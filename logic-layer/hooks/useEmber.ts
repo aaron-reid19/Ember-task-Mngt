@@ -17,11 +17,12 @@
  *  - D7: Task CRUD (completedTasks count) — Aaron — PENDING
  */
 
-import { HPData, EmberState } from "@/types/ember"
+import { HPData, EmberState } from "@/types/ember";
 import { calculateHP, classifyHP, checkBonfire } from "../utils/hpEngine";
 
+/** Returns an HPData interface using the values returned from helper functions */
 export function useEmber(): HPData {
-  // ^ STUB VALUES: hp, state, and isBonfire must be changed once data layer exists
+  // ^ STUB VALUES: Must be changed once data layer exists
   const hp = 72;
   const state: EmberState = "Steady";
   const isBonfire = false;

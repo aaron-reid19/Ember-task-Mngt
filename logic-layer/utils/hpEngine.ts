@@ -3,7 +3,7 @@
  * Layer: Logic
  * Owner: Josh
  * Task IDs: L1, L2, L5
- * Status: 🟠 IN PROGRESS
+ * Status: 🟤 IN PROGRESS
  * 
  * Notes: 
  *  - Calculates the HP of the Ember Character 
@@ -16,9 +16,9 @@
  *  - Kaley's branch: BONFIRE_HP_THRESHOLD const from @/types/ember — Kaley — PENDING MERGE
  */
 
-import { EmberStates } from "@/constants/EmberStates" 
-import { EmberState } from "@/types/ember"
-import { BONFIRE_HP_THRESHOLD } from "@/constants/EmberStates"
+import { EmberStates } from "@/constants/EmberStates"; 
+import { EmberState } from "@/types/ember";
+import { BONFIRE_HP_THRESHOLD } from "@/constants/EmberStates";
 
 /** Calculates Ember's HP as a percentage of completed tasks over daily goal. */
 export function calculateHP( completedTasks: number, dailyGoal: number ): number {
