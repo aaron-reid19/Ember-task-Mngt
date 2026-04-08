@@ -5,7 +5,10 @@
  * Task IDs: L1, L2, L5
  * Status: 🟠 IN PROGRESS
  * 
- * Notes: Calculates the HP of the Ember Character and returns an EmberState 
+ * Notes: 
+ *  - Calculates the HP of the Ember Character 
+ *  - Returns an EmberState
+ *  - Checks if Bonfire Mode
  * 
  * Dependencies: 
  *  - Kaley's branch: EmberStates from @/constants/EmberStates — Kaley — PENDING MERGE
@@ -19,7 +22,7 @@ import { BONFIRE_HP_THRESHOLD } from "@/constants/EmberStates"
 
 /** Calculates Ember's HP as a percentage of completed tasks over daily goal. */
 export function calculateHP( completedTasks: number, dailyGoal: number ): number {
-  // ^ Edge Case: Checks if dailyGoal is equal to or less than zero to avoid failure
+  // ^ EDGE CASE: Checks if dailyGoal is equal to or less than zero to avoid failure
   if (dailyGoal <= 0) {
     return 0;
   }
@@ -27,24 +30,24 @@ export function calculateHP( completedTasks: number, dailyGoal: number ): number
 }
 
 /** Maps a raw HP number to an EmberState using thresholds from EmberStates.ts. */
-export function classifyHP( HP: number ): EmberState {
-  if ( HP >= EmberStates.Thriving.hpMin && HP <= EmberStates.Thriving.hpMax ) {
+export function classifyHP( hp: number ): EmberState {
+  if ( hp >= EmberStates.Thriving.hpMin && hp <= EmberStates.Thriving.hpMax ) {
     return "Thriving";
   }
-  if ( HP >= EmberStates.Steady.hpMin && HP <= EmberStates.Steady.hpMax ) {
+  if ( hp >= EmberStates.Steady.hpMin && hp <= EmberStates.Steady.hpMax ) {
     return "Steady";
   }
-  if ( HP >= EmberStates.Strained.hpMin && HP <= EmberStates.Strained.hpMax ) {
+  if ( hp >= EmberStates.Strained.hpMin && hp <= EmberStates.Strained.hpMax ) {
     return "Strained";
   }
-  if ( HP >= EmberStates.Flickering.hpMin && HP <= EmberStates.Flickering.hpMax ) {
+  if ( hp >= EmberStates.Flickering.hpMin && hp <= EmberStates.Flickering.hpMax ) {
     return "Flickering";
   }
-  // ^ Edge Case: If HP value is outside range defined in EmberStates, return "Flickering"
+  // ^ EDGE CASE: If HP value is outside range defined in EmberStates, return "Flickering"
   return "Flickering";
 }
 
 /** Checks if HP === 100 and if Daily Spark has been completed, then returns a boolean */
-export function checkBonfire( HP: number, isDailySparkComplete: boolean ): boolean {
-  return HP === BONFIRE_HP_THRESHOLD && isDailySparkComplete;
+export function checkBonfire( hp: number, isDailySparkComplete: boolean ): boolean {
+  return hp === BONFIRE_HP_THRESHOLD && isDailySparkComplete;
 }
