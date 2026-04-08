@@ -3,7 +3,7 @@
  * Layer: Logic
  * Owner: Josh
  * Task IDs: L1, L2, L5
- * Status: 🟡 STUB
+ * Status: 🟤 STUB
  * 
  * Notes: 
  *  - Takes values returned from calculateHP(), classifyHP(), and checkBonfire()

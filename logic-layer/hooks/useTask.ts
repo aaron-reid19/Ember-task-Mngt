@@ -3,7 +3,7 @@
  * Layer: Logic
  * Owner: Josh
  * Task IDs: L3, L4
- * Status: 🟤 IN PROGRESS
+ * Status: 🟡 STUB
  * 
  * Notes: 
  *  - Returns a single task by ID
@@ -15,7 +15,7 @@
 
 import { Task } from "@/types/task";
 
-export function useTask(id: string): Task {
+export function useTask( id: string ): Task {
   return { 
     // ^ STUB VALUES: Must be changed once data layer exists
     id: "1234", name: "Workout", hpCost: 10, completed: false, isDailySpark: true,  

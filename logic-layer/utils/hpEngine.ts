@@ -3,7 +3,7 @@
  * Layer: Logic
  * Owner: Josh
  * Task IDs: L1, L2, L5
- * Status: 🟤 IN PROGRESS
+ * Status: 🟡 STUB
  * 
  * Notes: 
  *  - Calculates the HP of the Ember Character 
