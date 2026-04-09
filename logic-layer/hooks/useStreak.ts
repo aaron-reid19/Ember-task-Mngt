@@ -13,8 +13,8 @@
  */
 
 type StreakData = {
-current: number
-longest: number
+  current: number
+  longest: number
 }
 
 export function useStreak(): StreakData {
