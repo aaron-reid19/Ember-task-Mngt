@@ -32,36 +32,36 @@ One task each day is randomly picked as the **Daily Spark** — completing it gi
 
 ### Ember's four states
 
-| State | HP | What it looks like |
-|---|---|---|
-| Thriving | 80–100% | Bright, energetic, fully glowing |
-| Steady | 50–79% | Calm and present |
-| Strained | 20–49% | Dimmer, slower |
-| Flickering | 0–19% | Barely lit |
+| State      | HP       | What it looks like               |
+| ---------- | -------- | -------------------------------- |
+| Thriving   | 80–100% | Bright, energetic, fully glowing |
+| Steady     | 50–79%  | Calm and present                 |
+| Strained   | 20–49%  | Dimmer, slower                   |
+| Flickering | 0–19%   | Barely lit                       |
 
 > Ember never dies. It reflects where you are, not what you've failed at.
 
 ### Notifications
 
-| Name | When | What it does |
-|---|---|---|
-| Morning Daily Briefing | Morning | Shows current HP and any tasks carried over |
-| Daily Spark | Midday (randomised) | Surfaces today's Spark task |
-| Midnight Reckoning | Midnight | Reminds about incomplete tasks |
+| Name                   | When                | What it does                                |
+| ---------------------- | ------------------- | ------------------------------------------- |
+| Morning Daily Briefing | Morning             | Shows current HP and any tasks carried over |
+| Daily Spark            | Midday (randomised) | Surfaces today's Spark task                 |
+| Midnight Reckoning     | Midnight            | Reminds about incomplete tasks              |
 
 ---
 
 ## Tech stack
 
-| Layer | What we're using |
-|---|---|
-| Framework | React Native + Expo (managed workflow) |
-| Language | TypeScript |
-| Navigation | Expo Router (file-based, works like Next.js App Router) |
-| Animations | react-native-reanimated |
-| Local storage | AsyncStorage — holds current HP and visual state only |
-| Cloud storage | Firebase Firestore — tasks, quests, history, streaks |
-| Notifications | expo-notifications |
+| Layer         | What we're using                                        |
+| ------------- | ------------------------------------------------------- |
+| Framework     | React Native + Expo (managed workflow)                  |
+| Language      | TypeScript                                              |
+| Navigation    | Expo Router (file-based, works like Next.js App Router) |
+| Animations    | react-native-reanimated                                 |
+| Local storage | AsyncStorage — holds current HP and visual state only  |
+| Cloud storage | Firebase Firestore — tasks, quests, history, streaks   |
+| Notifications | expo-notifications                                      |
 
 ---
 
@@ -174,6 +174,7 @@ The first thing the user sees every time they open the app. Ember sits front and
 This screen calls `useEmber()` to get three things: the HP number, the current state label (e.g. `"Steady"`), and a `isBonfire` boolean. It calls `useDailySpark()` to get today's Spark task. Both come from Josh. The screen just receives those values and passes them down as props.
 
 **What each component does here:**
+
 - `EmberCreature` gets the state label, picks the right sprite, and drives its own Reanimated animation. `EmberAnimations` runs inside it — the screen never touches it directly.
 - `HPBar` gets the HP number and animates the bar width. That's all it does — it has no idea the number came from AsyncStorage.
 - `DailySparkCard` gets the spark task object and renders the task name with a completion button. It uses `Card` and `Button` internally.
@@ -188,6 +189,7 @@ The Quest Board. Today's quests appear at the top. Below that, recurring quests 
 The selected filter tab is held in local `useState` on this screen — that's a UI decision, not a data one. The screen passes the selected filter into `useQuests(filter)` which returns the matching list from Firestore.
 
 **What each component does here:**
+
 - `QuestFilterTabs` gets the currently selected filter and an `onSelect` callback. It renders the tab strip and fires the callback when the user taps. It doesn't decide which quests to show — it just tells the screen what was tapped.
 - `QuestCard` gets a single quest object and renders one row. It uses `Card` as its container internally. It fires an `onPress` callback up to the screen, which handles the navigation push.
 
@@ -208,6 +210,7 @@ The full task list. Each row shows the task name, priority level, any tags, and 
 Calls `useTasks()` for the list and `useEmber()` for current HP — the live HP number is shown alongside the task list so the user can see how their current state connects to what's pending.
 
 **What each component does here:**
+
 - `TaskListItem` gets a single task object and renders the full row including priority, tags, and HP cost. It uses `Card` as its container and `Badge` for the priority and tag labels. It fires `onPress` up to the screen for navigation.
 - `Badge` is used inside `TaskListItem` — the screen doesn't render `Badge` directly here.
 
@@ -218,6 +221,7 @@ Calls `useTasks()` for the list and `useEmber()` for current HP — the live HP 
 Pushed when the user taps a task. The user can edit the name, priority, tags, and HP cost. All form values are held in local `useState` on this screen. When the user saves, the screen calls `FirestoreService.updateTask()` with the updated values — Aaron's service handles the actual write.
 
 **What each component does here:**
+
 - `HPCostCalculator` gets the current cost value and an `onCostChange` callback. It owns the + / − interaction entirely — the screen just holds the number in state and updates it when the callback fires.
 - `Badge` is used here for the priority selector.
 - `Button` triggers the save action.
@@ -231,6 +235,7 @@ The long-term view. HP trend chart with a weekly/monthly toggle, current streak 
 This is the one screen that can't show real content until Aaron's `D9` task (daily HP snapshot writes) is working. Calls `useStreak()` for the streak count and `useHPHistory(range)` for the chart data.
 
 **What each component does here:**
+
 - `HPTrendChart` gets an array of `HPSnapshot` objects. It handles the weekly/monthly toggle itself with internal `useState` — the screen just passes the full history and doesn't need to know which range is active.
 - `StreakDisplay` gets the streak number from `useStreak()` and renders it.
 - `EvolutionLog` gets the HP history and renders a timeline of creature state changes.
@@ -324,27 +329,33 @@ All three profile components get their data as props from the Profile screen. No
 ---
 
 ### Wave 1 — Foundation · Mar 25–27
+
 > The shared contracts. Everything else depends on this wave being done first.
 
 **Aaron**
-- [ ] `D1` Init Expo project, install all dependencies, verify Android build runs
-- [ ] `D2` Scaffold folder structure — create all screen files as empty stubs
+
+- [X] `D1` Init Expo project, install all dependencies, verify Android build runs
+- [X] `D2` Scaffold folder structure — create all screen files as empty stubs
 - [ ] `D4` Firebase init: Firestore config, environment variables, security rules
 - [ ] `D5` Firestore schema: tasks, quests, HP history, streaks, evolution state
 
 **Kaley**
+
 - [ ] Write `types/ember.ts`, `types/task.ts`, `types/quest.ts`, `types/index.ts`
 - [ ] Write `constants/Colors.ts`, `constants/Typography.ts`, `constants/Spacing.ts`, `constants/EmberStates.ts`
 
 **Josh**
+
 - [ ] Write stub versions of all hooks returning hardcoded data so Kaley can build screens without waiting
 
 ---
 
 ### Wave 2 — Core data + independent UI · Mar 28–Apr 1
+
 > Aaron builds storage. Josh builds core logic. Kaley builds all screens that don't need live data.
 
 **Aaron**
+
 - [ ] `D3` AsyncStorage module: read/write HP and visual state · `needs: D1`
 - [ ] `D6` HP sync contract: AsyncStorage first, Firestore async · `needs: D3, D4`
 - [ ] `D7` Task CRUD in Firestore · `needs: D4, D5`
@@ -353,12 +364,14 @@ All three profile components get their data as props from the Profile screen. No
 - [ ] `D12` Notification permission request + denial fallback · `needs: D11`
 
 **Josh**
+
 - [ ] `L1` HP ratio engine: `(completed / goal) × 100` · `needs: types/ember.ts`
 - [ ] `L2` HP state classifier: maps HP % to a state label · `needs: L1, EmberStates.ts`
 - [ ] `L3` Task cost logic: add subtracts HP, complete restores · `needs: L1`
 - [ ] `L7` Quest recurrence logic: all cadence types · `needs: types/quest.ts`
 
 **Kaley**
+
 - [ ] `U9` Onboarding screen · `needs: D2, types, constants`
 - [ ] `U6` Task list screen · `needs: D2, stub hooks`
 - [ ] `U4` Quest Board screen · `needs: D2, stub hooks`
@@ -369,13 +382,16 @@ All three profile components get their data as props from the Profile screen. No
 ---
 
 ### Wave 3 — Integration · Apr 2–6
+
 > Real hooks replace stubs. Screens wire to live data. Creature comes together.
 
 **Aaron**
+
 - [ ] `D9` Daily HP snapshot writes · `needs: D6, D7`
 - [ ] `D10` Offline degradation: AsyncStorage-only fallback · `needs: D3, D6`
 
 **Josh**
+
 - [ ] `L4` Daily Spark selection algorithm · `needs: L1, D7`
 - [ ] `L5` Bonfire Mode trigger · `needs: L1, L4`
 - [ ] `L6` Streak calculation · `needs: D9`
@@ -384,6 +400,7 @@ All three profile components get their data as props from the Profile screen. No
 - [ ] Replace all stub hooks with real implementations · `needs: L1–L7, D3, D6`
 
 **Kaley**
+
 - [ ] `U3` Creature state animations with Reanimated · `needs: types/ember.ts, EmberStates.ts`
 - [ ] `U1` Home screen wired to `useEmber()` · `needs: U3, L2 stub or real`
 - [ ] `U2` Daily Spark card + Bonfire indicator · `needs: U1, L4 stub or real`
@@ -393,15 +410,19 @@ All three profile components get their data as props from the Profile screen. No
 ---
 
 ### Wave 4 — Completion + polish · Apr 7–9
+
 > Profile screen, final wiring, consistency pass.
 
 **Aaron**
+
 - [ ] End-to-end test: offline mode, HP sync, Firestore reads on fresh install
 
 **Josh**
+
 - [ ] End-to-end test: HP formula, state transitions, Bonfire trigger, notifications
 
 **Kaley**
+
 - [ ] `U8` Profile screen · `needs: D9, L6`
 - [ ] Build profile components: `HPTrendChart`, `StreakDisplay`, `EvolutionLog`
 - [ ] Swap all stub hooks for real implementations · `needs: Wave 3 complete`
@@ -411,6 +432,7 @@ All three profile components get their data as props from the Profile screen. No
 ---
 
 ### Apr 10 — Submission day
+
 - [ ] Final Android build verified on emulator
 - [ ] All screens reachable, no crashes on main flows
 - [ ] README updated
@@ -432,24 +454,26 @@ The only connection between the two is a prop. The screen calls Josh's hook, get
 
 ### What lives where
 
-| Work | File | Who |
-|---|---|---|
-| Read HP from AsyncStorage | `services/AsyncStorageService.ts` | Aaron |
-| Calculate HP ratio | `hooks/useEmber.ts` | Josh |
-| Classify HP into a creature state | `hooks/useEmber.ts` | Josh |
-| Determine if Bonfire should trigger | `hooks/useEmber.ts` | Josh |
-| Write a completed task to Firestore | `services/FirestoreService.ts` | Aaron |
-| Animate the HP bar when the value changes | `components/ui/HPBar.tsx` | Kaley |
-| Decide what Thriving looks and feels like | `components/ember/EmberCreature.tsx` | Kaley |
-| Track which filter tab is active | `components/quests/QuestFilterTabs.tsx` | Kaley |
-| Handle the + / − on the HP cost stepper | `components/tasks/HPCostCalculator.tsx` | Kaley |
+| Work                                      | File                                      | Who   |
+| ----------------------------------------- | ----------------------------------------- | ----- |
+| Read HP from AsyncStorage                 | `services/AsyncStorageService.ts`       | Aaron |
+| Calculate HP ratio                        | `hooks/useEmber.ts`                     | Josh  |
+| Classify HP into a creature state         | `hooks/useEmber.ts`                     | Josh  |
+| Determine if Bonfire should trigger       | `hooks/useEmber.ts`                     | Josh  |
+| Write a completed task to Firestore       | `services/FirestoreService.ts`          | Aaron |
+| Animate the HP bar when the value changes | `components/ui/HPBar.tsx`               | Kaley |
+| Decide what Thriving looks and feels like | `components/ember/EmberCreature.tsx`    | Kaley |
+| Track which filter tab is active          | `components/quests/QuestFilterTabs.tsx` | Kaley |
+| Handle the + / − on the HP cost stepper  | `components/tasks/HPCostCalculator.tsx` | Kaley |
 
 **Stays inside components:**
+
 - Reanimated animations triggered by a prop change
 - `useState` for local interaction: selected tab, stepper value, open/closed toggles
 - `onPress` handlers that fire a callback prop up to the screen
 
 **Never inside components:**
+
 - Reading from AsyncStorage or Firestore
 - Running the HP formula or classifying states
 - Scheduling notifications
