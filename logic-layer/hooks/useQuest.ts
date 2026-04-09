@@ -3,7 +3,7 @@
  * Layer: Logic
  * Owner: Josh
  * Task IDs: L7
- * Status: 🟠 IN PROGRESS
+ * Status: 🟡 STUB
  * 
  * Notes: 
  *  - Returns an single quest by id
@@ -15,7 +15,6 @@
 
 import { Quest } from "@/types/quest";
 
-/** Returns a single quest by id number */
 export function useQuest( id: string ): Quest {
   // ^ STUB VALUES: Must be changed once data layer exists
   return {

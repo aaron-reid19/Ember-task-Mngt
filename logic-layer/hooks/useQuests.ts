@@ -3,7 +3,7 @@
  * Layer: Logic
  * Owner: Josh
  * Task IDs: L7
- * Status: 🟠 IN PROGRESS
+ * Status: 🟡 STUB
  * 
  * Notes: 
  *  - Returns a full list of Quests to any screen that requires them
@@ -15,7 +15,6 @@
 
 import { Quest, QuestCadence } from "@/types/quest";
 
-/** Returns a full list of Quests */
 export function useQuests(cadence?: QuestCadence): Quest[] {
   // ^ STUB VALUES: Must be changed once data layer exists
   return [

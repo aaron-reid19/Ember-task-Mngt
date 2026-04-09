@@ -15,7 +15,6 @@
 
 import { Task } from "@/types/task";
 
-/** Returns the full list of tasks */
 export function useTasks(): Task[] {
   // ^ STUB VALUES: Must be changed once data layer exists
   return [
