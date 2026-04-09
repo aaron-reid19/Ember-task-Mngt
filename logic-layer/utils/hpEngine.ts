@@ -53,7 +53,7 @@ export function checkBonfire( hp: number, isDailySparkComplete: boolean ): boole
 }
 
 /** Calculates HP received for completing a single task */
-export function calculateTaskValue( dailyGoal: number ): number {
+export function calculateTaskHP( dailyGoal: number ): number {
   // ^ EDGE CASE: Checks if dailyGoal is equal to or less than zero to avoid failure
   if (dailyGoal <= 0) {
     return 100;
