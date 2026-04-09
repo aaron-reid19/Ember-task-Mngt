@@ -2,8 +2,8 @@
  * Ember — hpEngine.ts
  * Layer: Logic
  * Owner: Josh
- * Task IDs: L1, L2, L5
- * Status: 🟡 STUB
+ * Task IDs: L1, L2, L3, L5
+ * Status: 🟤 In Progress
  * 
  * Notes: 
  *  - Calculates the HP of the Ember Character 
@@ -50,4 +50,13 @@ export function classifyHP( hp: number ): EmberState {
 /** Checks if HP === 100 and if Daily Spark has been completed, then returns a boolean */
 export function checkBonfire( hp: number, isDailySparkComplete: boolean ): boolean {
   return hp === BONFIRE_HP_THRESHOLD && isDailySparkComplete;
+}
+
+/** Calculates HP received for completing a single task */
+export function calculateTaskValue( dailyGoal: number ): number {
+  // ^ EDGE CASE: Checks if dailyGoal is equal to or less than zero to avoid failure
+  if (dailyGoal <= 0) {
+    return 100;
+  }
+  return ( 1 / dailyGoal ) * 100;
 }
