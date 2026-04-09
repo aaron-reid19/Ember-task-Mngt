@@ -15,6 +15,7 @@
 
 import { Quest, QuestCadence } from "@/types/quest";
 
+/** Returns a full list of Quests */
 export function useQuests(cadence?: QuestCadence): Quest[] {
   // ^ STUB VALUES: Must be changed once data layer exists
   return [

@@ -6,7 +6,7 @@
  * Status: 🟠 IN PROGRESS
  * 
  * Notes: 
- *  - Returns a full list of Quests to any screen that requires them
+ *  - Returns an single quest by id
  * 
  * Dependencies: 
  *  - Kaley's branch: Task from @/types/quest — Kaley — PENDING MERGE
@@ -15,3 +15,18 @@
 
 import { Quest } from "@/types/quest";
 
+/** Returns a single quest by id number */
+export function useQuest( id: string ): Quest {
+  // ^ STUB VALUES: Must be changed once data layer exists
+  return {
+    id: "4321", name: "Wash Dishes",
+    // description?: string;    
+    hpCost: 10,          // displayed as "+20 pts" on QuestCard
+    cadence: "Daily",
+    // activeDays?: WeekDay[];  // only relevant when cadence is "Weekly"
+    // startDate?: string;      // ISO date string — set in Add Quest form
+    completed: true,
+    isDailySpark: false,   // true if this quest was selected as today's Spark
+    status: "complete"
+  }
+}
