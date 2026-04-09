@@ -20,7 +20,7 @@ export function useTasks(): Task[] {
   return [
     { 
       id: "1234", name: "Workout", hpCost: 10, completed: false, isDailySpark: true,  
-      priority: "high", tags: ["Fitness", "Health"], createdAt: "2026-04-08T09:00:00Z"
+      priority: "high", tags: ["Fitness", "Health"], createdAt: "2026-04-08T09:00:00Z" // ISO date string
     }
   ]
 }
