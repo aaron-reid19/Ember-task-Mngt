@@ -3,7 +3,7 @@
  * Layer: Logic
  * Owner: Josh
  * Task IDs: L4
- * Status: 🟠 In Progress
+ * Status: 🟡 STUB
  * 
  * Notes: 
  *  - Returns an single task that has been randomly selected as the Daily Spark
