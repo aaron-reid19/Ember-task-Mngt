@@ -9,7 +9,7 @@
  *  - Randomly selects a task to be designated as the Daily Spark
  * 
  * Dependencies: 
- *  - Kaley's branch: Task type from @/types/ember — Kaley — PENDING MERGE
+ *  - Kaley's branch: Task type from @/types/task — Kaley — PENDING MERGE
  */
 
 import { Task } from "@/types/task";
