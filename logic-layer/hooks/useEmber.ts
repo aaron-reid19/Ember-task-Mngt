@@ -16,14 +16,18 @@
  *  - D7: Task CRUD (completedTasks count) — Aaron — PENDING
  */
 
-import { HPData, EmberState } from "@/types/ember";
+import { HPData } from "@/types/ember";
 import { calculateHP, classifyHP, checkBonfire } from "../utils/hpEngine";
 
 export function useEmber(): HPData {
-  // ^ STUB VALUES: Must be changed once data layer exists
-  const hp = 72;
-  const state: EmberState = "Steady";
-  const isBonfire = false;
+  // TODO: Replace with AsyncStorage reads from D3 and D7
+  const completedTasks = 3;
+  const dailyGoal = 5;
+  const isDailySparkCompleted = false;
+
+  const hp = calculateHP(completedTasks, dailyGoal);
+  const state = classifyHP(hp);
+  const isBonfire = checkBonfire(hp, isDailySparkCompleted);
 
   return { hp, state, isBonfire }
 }
