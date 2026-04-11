@@ -14,11 +14,16 @@
  */
 
 import { Task } from "@/types/task";
+import { selectDailySpark } from "../utils/sparkEngine";
 
-export function useDailySpark (): Task {
+export function useDailySpark (): Task | null {
   // ^ STUB VALUES: Must be changed once data layer exists
-  return { 
-    id: "1234", name: "Workout", hpCost: 10, completed: false, isDailySpark: true,  
-    priority: "high", tags: ["Fitness", "Health"], createdAt: "2026-04-08T09:00:00Z" // ISO date string
-  }
+  const tasks: Task[] = [
+    { id: "1", name: "Workout", hpCost: 10, completed: false, isDailySpark: false, priority: "high", tags: ["Fitness"], createdAt: "2026-04-11T09:00:00Z" },
+    { id: "2", name: "Read for 20 Minutes", hpCost: 5, completed: false, isDailySpark: false, priority: "low", tags: ["Learning"], createdAt: "2026-04-11T09:00:00Z" },
+    { id: "3", name: "Drink Water", hpCost: 3, completed: true, isDailySpark: false, priority: "medium", tags: ["Health"], createdAt: "2026-04-11T09:00:00Z" }
+  ];
+
+  const dailySpark = selectDailySpark(tasks);
+  return dailySpark;
 }
