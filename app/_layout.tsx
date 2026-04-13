@@ -60,4 +60,14 @@ export default function RootLayout() {
       <Stack screenOptions={{ headerShown: false }} />
     </SafeAreaProvider>
   );
+import { AuthProvider } from "@/context/authContext";
+
+export default function RootLayout() {
+  return (
+    <AuthProvider>
+    <Stack />;
+  </AuthProvider>
+  
+  )
+  
 }
