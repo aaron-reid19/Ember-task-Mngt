@@ -14,7 +14,7 @@
  *  - Kaley's branch: WeekDay type from @/types/quest — Kaley — PENDING MERGE
  */
 
-import { Quest, WeekDay } from "@/types/quest";
+import { Quest, WeekDay } from "@/types";
 
 export function isQuestDueToday( quest: Quest, today: Date ): boolean {
   const dayMap: Record<number, WeekDay> = {

@@ -1,8 +1,3 @@
-// 🔵 DECISION — replaced Aaron's QuestCard with Kaley's version [Apr 2026]
-// ? Aaron: your version had only onPress prop. Kaley's adds onToggle for checkbox interaction.
-//   Layout changed: checkbox + text block + HP pts column (matching Figma).
-//   Uses Quest.hpCost instead of Quest.hpReward.
-
 /**
  * Ember — QuestCard
  * Layer: UI

@@ -22,27 +22,41 @@
  */
 
 import { Redirect } from "expo-router";
+import { useAuth } from "@/store/authContext";
+import { useAppStore } from "@/store/useAppStore";
+import { View, ActivityIndicator, StyleSheet } from "react-native";
+import Colors from "@/constants/Colors";
 
 export default function Index() {
-  // ┌──────────────────────────────────────────────────────────────┐
-  // │ ONBOARDING CHECK                                             │
-  // │ 🟡 STUB [D3] — always skips onboarding (hardcoded to true)  │
-  // │ Owner: Kaley | Replaces: AsyncStorage read for onboarding    │
-  // │                                                              │
-  // │ ← AARON: when D3 lands, replace this with:                  │
-  // │   const hasCompletedOnboarding =                             │
-  // │     await AsyncStorageService.getOnboardingStatus();         │
-  // │                                                              │
-  // │ The onboarding screen (goal-setup.tsx) will call             │
-  // │ AsyncStorageService.saveGoal() on confirm, which should also │
-  // │ set the onboarding flag so this redirect works correctly.    │
-  // └──────────────────────────────────────────────────────────────┘
-  const hasCompletedOnboarding = true;
+  const { user, loading: authLoading } = useAuth();
+  const { onboardingComplete, loading: storeLoading } = useAppStore();
 
-  // First-time users go to onboarding, returning users go straight to tabs
-  if (!hasCompletedOnboarding) {
+  if (authLoading || storeLoading) {
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator size="large" color={Colors.accent} />
+      </View>
+    );
+  }
+
+  // Not signed in — send to login
+  if (!user) {
+    return <Redirect href="/(auth)/login" />;
+  }
+
+  // Signed in but hasn't set up their goal yet
+  if (!onboardingComplete) {
     return <Redirect href="/(onboarding)/goal-setup" />;
   }
 
   return <Redirect href="/(tabs)" />;
 }
+
+const styles = StyleSheet.create({
+  loading: {
+    flex: 1,
+    backgroundColor: Colors.bgDeep,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});

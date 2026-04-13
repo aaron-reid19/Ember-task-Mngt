@@ -1,8 +1,3 @@
-// 🔵 DECISION — replaced Aaron's DailySparkCard with Kaley's version [Apr 2026]
-// ? Aaron: your version used Task type. Kaley's uses Quest type for the spark task.
-//   Layout changed: Kaley's has icon + text block + COMPLETE button in a horizontal row.
-//   Button text toggles COMPLETE ↔ COMPLETED based on task.completed state.
-
 /**
  * Ember — DailySparkCard
  * Layer: UI

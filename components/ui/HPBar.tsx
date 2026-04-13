@@ -1,8 +1,3 @@
-// 🔵 DECISION — replaced Aaron's HPBar with Kaley's version [Apr 2026]
-// ? Aaron: your version used state-based color fill + label row.
-//   Kaley's uses LinearGradient (red→amber) fill with configurable height and no label row.
-//   Added `height` prop that your version didn't have.
-
 /**
  * Ember — HPBar
  * Layer: UI

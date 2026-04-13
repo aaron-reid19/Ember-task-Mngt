@@ -1,7 +1,3 @@
-// 🔵 DECISION — replaced Aaron's Spacing.ts with Kaley's version [Apr 2026]
-// ? Aaron: your version used `screenEdge: 16`. Kaley's uses `screen: 20`, `card: 16`, `cardGap: 12`, `sectionGap: 24`.
-//   Files referencing Spacing.screenEdge need updating to Spacing.screen.
-
 /**
  * Ember — Spacing
  * Layer: UI

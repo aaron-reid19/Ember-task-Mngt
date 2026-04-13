@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useContext, useEffect, useState} from "react";
 import { User } from "firebase/auth";
-import { subscribeToAuth, login, signup, logout, loginWithGoogle} from "@/firebase/auth";
+import { subscribeToAuth, login, signup, logout, loginWithGoogle} from "@/services/firebaseAuth";
 
 type AuthContextType = {
     user: User | null;

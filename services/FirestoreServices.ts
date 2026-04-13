@@ -7,7 +7,7 @@ import { doc,
     deleteDoc,
     getDoc,
     getDocs } from "firebase/firestore";
-import { db } from "@/firebase/config";
+import { db } from "./firebaseConfig";
 
 export type EmberState = "Thriving" | "Steady" | "Strained" | "Flickering";
 export type TaskPriority = "low" | "medium" | "high";
@@ -23,7 +23,6 @@ export type UserProfileInput = {
     displayName?: string | null;
     email?: string | null;
     photoURL?: string | null;
-    dailyGoal?: number;
 }
 
 export type TaskInput ={
@@ -50,10 +49,10 @@ function profileRef (userId: string){
 
 export async function createUserProfile(userId: string, data?: UserProfileInput){
     await setDoc(profileRef(userId), {
-        dailyGoal:data?.dailyGoal ?? 1,
         currentHP: 100,
         emberState: "thriving",
         bonfireActive: false,
+        onboardingComplete: false,
         displayName: data?.displayName ?? null,
         email: data?.email ?? null,
         photoURL: data?.photoURL ?? null,
@@ -86,10 +85,10 @@ export async function getUserProfile(userId: string) {
 
 export async function updateUserProfile (userId: string,
 updates: Partial<{
-  dailyGoal: number;
   currentHP: number;
   emberState: EmberState;
   bonfireActive: boolean;
+  onboardingComplete: boolean;
   displayName: string | null;
   email: string | null;
   photoURL: string | null;
@@ -177,7 +176,65 @@ export async function createQuest(userId: string, quest: QuestInput) {
   export async function getQuests(userId: string) {
     const questsRef = collection(db, "users", userId, "quests");
     const snapshot = await getDocs(questsRef);
-  
+
+    return snapshot.docs.map((docSnap) => ({
+      id: docSnap.id,
+      ...docSnap.data(),
+    }));
+  }
+
+  export async function updateQuest(
+    userId: string,
+    questId: string,
+    updates: Partial<{
+      title: string;
+      description: string;
+      hpReward: number;
+      cadence: QuestCadence;
+      recurrenceRule: string | null;
+      completed: boolean;
+    }>
+  ) {
+    const questRef = doc(db, "users", userId, "quests", questId);
+    await updateDoc(questRef, {
+      ...updates,
+      updatedAt: serverTimestamp(),
+    });
+  }
+
+  export async function getQuest(userId: string, questId: string) {
+    const questRef = doc(db, "users", userId, "quests", questId);
+    const snapshot = await getDoc(questRef);
+
+    if (!snapshot.exists()) {
+      return null;
+    }
+
+    return {
+      id: snapshot.id,
+      ...snapshot.data(),
+    };
+  }
+
+  export async function getTask(userId: string, taskId: string) {
+    const taskRef = doc(db, "users", userId, "tasks", taskId);
+    const snapshot = await getDoc(taskRef);
+
+    if (!snapshot.exists()) {
+      return null;
+    }
+
+    return {
+      id: snapshot.id,
+      ...snapshot.data(),
+    };
+  }
+
+  // HP Snapshots (History)
+  export async function getHPSnapshots(userId: string) {
+    const snapshotsRef = collection(db, "users", userId, "hpSnapshots");
+    const snapshot = await getDocs(snapshotsRef);
+
     return snapshot.docs.map((docSnap) => ({
       id: docSnap.id,
       ...docSnap.data(),

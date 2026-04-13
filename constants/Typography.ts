@@ -1,8 +1,3 @@
-// 🔵 DECISION — replaced Aaron's Typography.ts with Kaley's version [Apr 2026]
-// ? Aaron: your version exported FontSize + FontWeight as separate objects.
-//   Kaley's exports a single `Typography` object with sizes (xs–hero), weights, and letter spacing.
-//   Files importing FontSize/FontWeight need updating to import { Typography }.
-
 /**
  * Ember — Typography
  * Layer: UI

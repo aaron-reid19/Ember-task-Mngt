@@ -1,19 +1,18 @@
-// 🔵 DECISION — replaced Aaron's Home screen scaffold with Kaley's full Figma implementation [Apr 2026]
-// ? Aaron: Kaley's version adds greeting, status strip, Today's Progress section, task list, and "See All" link.
-//   Your simpler version had fewer imports and no task list. This version is the Figma-matching UI.
-
 /**
  * Ember — Home Screen
  * Layer: UI
  * Owner: Kaley
  * Task IDs: U1, U2
- * Status: 🟡 STUB
+ * Status: 🟢 READY
  *
  * Dependencies:
  *   - L1, L2: useEmber() returning { hp, state, isBonfire } — Josh — PENDING
  *   - L4: useDailySpark() returning { task, onComplete } — Josh — PENDING
  *   - L3: task HP restoration on complete — Josh — PENDING
  *   - D3: AsyncStorage HP read on mount — Aaron — PENDING
+ *
+ *   HP is driven by task hpCost values:
+ *     HP = (sum completed hpCost / sum total hpCost) × 100
  *
  * Notes:
  *   Figma pages 2–7 show the Home screen across six HP states:
@@ -33,6 +32,7 @@ import {
   View,
   Pressable,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { EmberCreature } from "@/components/ember/EmberCreature";
 import { HPBar } from "@/components/ui/HPBar";
@@ -42,96 +42,55 @@ import { TaskListItem } from "@/components/tasks/TaskListItem";
 import Colors from "@/constants/Colors";
 import { Typography } from "@/constants/Typography";
 import { Spacing } from "@/constants/Spacing";
-import { EmberState } from "@/constants/EmberStates";
-import { Task, Quest } from "@/types";
-
-// ~ ─────────────────────────────────────────────────────────────────
-// ~ STUB DATA — replace with real hooks when Josh's Wave 2 logic lands
-// ~ ─────────────────────────────────────────────────────────────────
-
-// 🟡 STUB [L1, L2] — replace with useEmber() when Josh's logic hooks are done
-// Owner: Kaley | Replaces: { hp, state, isBonfire } from useEmber()
-// ^ hardcoded at Smoldering to exercise the low-HP visual state during dev
-const hp = 12;
-const state: EmberState = "Strained";
-const isBonfire = false;
-
-// 🟡 STUB [L4] — replace with useDailySpark() when Josh's hook is done
-// Owner: Kaley | Replaces: { task, onComplete } from useDailySpark()
-const stubSparkTask: Quest = {
-  id: "spark-stub-001",
-  name: "Clean Bathroom",
-  hpCost: 20,
-  completed: false,
-  isDailySpark: true,
-  cadence: "Daily",
-  status: "in progress",
-};
-
-// 🟡 STUB [L3, D7] — replace with useTasks() when Josh + Aaron's layers are done
-// Owner: Kaley | Replaces: tasks array from useTasks()
-const stubTasks: Task[] = [
-  {
-    id: "t1",
-    name: "Read for 20 Minutes",
-    hpCost: 10,
-    completed: false,
-    isDailySpark: false,
-    priority: "medium",
-    tags: [],
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "t2",
-    name: "Clean Bathroom",
-    hpCost: 20,
-    completed: false,
-    isDailySpark: true,
-    priority: "high",
-    tags: [],
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "t3",
-    name: "Walk Jaronadel 🐾",
-    hpCost: 10,
-    completed: false,
-    isDailySpark: false,
-    priority: "low",
-    tags: [],
-    createdAt: new Date().toISOString(),
-  },
-];
-
-// 🟡 STUB [D3] — replace with real user name from store/profile when Aaron's D3 is done
-const userName = "Joshua";
-const dailyGoal = 10;
-const completedCount = 0;
-
-// ~ ─────────────────────────────────────────────────────────────────
+import { useEmber } from "@/hooks/useEmber";
+import { useDailySpark } from "@/hooks/useDailySpark";
+import { useTasks } from "@/hooks/useTasks";
+import { useAuth } from "@/store/authContext";
+import { useStreak } from "@/hooks/useStreak";
+import { updateTask } from "@/services/FirestoreServices";
 
 export default function HomeScreen() {
-  // ← JOSH: replace stub values above with:
-  // const { hp, state, isBonfire } = useEmber();
-  // const { task: sparkTask, onComplete } = useDailySpark();
-  // ← JOSH: plug useTasks() here for the task list
-  // ← AARON: userName and dailyGoal come from useAppStore() or user profile
+  const { hp, state, isBonfire } = useEmber();
+  const { spark: sparkTask } = useDailySpark();
+  const { tasks, refresh: refreshTasks } = useTasks();
+  const { user } = useAuth();
+  const { current: streakDays } = useStreak();
 
-  function handleSparkComplete() {
-    // 🔴 BLOCKED [L3, D7] — waiting on Josh's task cost logic + Aaron's Firestore write
-    // Unblock: FirestoreService.completeTask() and useEmber() HP update must exist
-    // ! do not ship this handler until the blocker is cleared
-    console.log("🟡 STUB: spark complete tapped — no HP update yet");
+  const completedCount = tasks.filter((t) => t.completed).length;
+  const totalHP = tasks.reduce((sum, t) => sum + (t.hpCost ?? 0), 0);
+  const completedHP = tasks.filter((t) => t.completed).reduce((sum, t) => sum + (t.hpCost ?? 0), 0);
+  const userName = user?.displayName ?? "Explorer";
+
+  // Build a spark quest object for the DailySparkCard component
+  const sparkQuest = sparkTask
+    ? {
+        id: sparkTask.id,
+        name: sparkTask.name,
+        hpCost: sparkTask.hpCost,
+        completed: sparkTask.completed,
+        isDailySpark: true,
+        cadence: "Daily" as const,
+        status: (sparkTask.completed ? "complete" : "in progress") as "complete" | "in progress",
+      }
+    : null;
+
+  async function handleSparkComplete() {
+    if (!user || !sparkTask) return;
+    await updateTask(user.uid, sparkTask.id, { completed: true });
+    refreshTasks();
   }
 
-  function handleTaskToggle(taskId: string) {
-    // 🔴 BLOCKED [L3, D7] — same as above
-    console.log("🟡 STUB: task toggled", taskId);
+  async function handleTaskToggle(taskId: string) {
+    if (!user) return;
+    const task = tasks.find((t) => t.id === taskId);
+    if (!task) return;
+    await updateTask(user.uid, taskId, { completed: !task.completed });
+    refreshTasks();
   }
 
   return (
+    <SafeAreaView style={styles.screen} edges={["top"]}>
     <ScrollView
-      style={styles.screen}
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
     >
@@ -144,7 +103,7 @@ export default function HomeScreen() {
       {/* Status strip: streak · state label · HP number */}
       <View style={styles.statusStrip}>
         <View style={styles.pill}>
-          <Text style={styles.pillText}>🔥 7-Day Streak</Text>
+          <Text style={styles.pillText}>🔥 {streakDays}-Day Streak</Text>
         </View>
         <View style={styles.pill}>
           <Text style={styles.pillText}>{state}</Text>
@@ -161,23 +120,23 @@ export default function HomeScreen() {
       {isBonfire && <BonfireIndicator />}
 
       {/* Daily Spark card */}
-      <DailySparkCard task={stubSparkTask} onComplete={handleSparkComplete} />
+      {sparkQuest && <DailySparkCard task={sparkQuest} onComplete={handleSparkComplete} />}
 
       {/* Today's Progress */}
       <View style={styles.progressSection}>
         <View style={styles.progressHeader}>
           <Text style={styles.progressTitle}>TODAY'S PROGRESS</Text>
           <Text style={styles.progressCount}>
-            {completedCount} of {dailyGoal} Complete
+            {completedHP} of {totalHP} HP
           </Text>
         </View>
 
-        {/* Progress bar */}
-        <HPBar value={(completedCount / dailyGoal) * 100} state={state} height={6} />
+        {/* Progress bar — HP earned vs total HP on the board */}
+        <HPBar value={totalHP > 0 ? (completedHP / totalHP) * 100 : 100} state={state} height={6} />
 
         {/* Task list — max 3 shown on Home */}
         <View style={styles.taskList}>
-          {stubTasks.slice(0, 3).map((task) => (
+          {tasks.slice(0, 3).map((task) => (
             <TaskListItem
               key={task.id}
               task={task}
@@ -192,6 +151,7 @@ export default function HomeScreen() {
         </Pressable>
       </View>
     </ScrollView>
+    </SafeAreaView>
   );
 }
 

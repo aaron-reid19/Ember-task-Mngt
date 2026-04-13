@@ -27,6 +27,7 @@ import { useState } from "react";
 import { Stack } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NotificationBanner } from "@/components/ui/NotificationBanner";
+import { AuthProvider } from "@/store/authContext";
 
 export default function RootLayout() {
   // ┌──────────────────────────────────────────────────────────────┐
@@ -49,25 +50,17 @@ export default function RootLayout() {
   const [showNotificationBanner, setShowNotificationBanner] = useState(false);
 
   return (
-    <SafeAreaProvider>
-      {/* Banner sits above the navigation stack — visible on all screens */}
-      <NotificationBanner
-        visible={showNotificationBanner}
-        onDismiss={() => setShowNotificationBanner(false)}
-      />
-
-      {/* All screens render inside this Stack — headerShown:false lets each screen control its own header */}
-      <Stack screenOptions={{ headerShown: false }} />
-    </SafeAreaProvider>
-  );
-import { AuthProvider } from "@/context/authContext";
-
-export default function RootLayout() {
-  return (
     <AuthProvider>
-    <Stack />;
-  </AuthProvider>
-  
-  )
-  
+      <SafeAreaProvider>
+        {/* Banner sits above the navigation stack — visible on all screens */}
+        <NotificationBanner
+          visible={showNotificationBanner}
+          onDismiss={() => setShowNotificationBanner(false)}
+        />
+
+        {/* All screens render inside this Stack — headerShown:false lets each screen control its own header */}
+        <Stack screenOptions={{ headerShown: false }} />
+      </SafeAreaProvider>
+    </AuthProvider>
+  );
 }

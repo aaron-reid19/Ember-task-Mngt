@@ -1,7 +1,3 @@
-// 🔵 DECISION — replaced Aaron's Badge with Kaley's version [Apr 2026]
-// ? Aaron: your version had a `color` prop. Kaley's uses `variant` ("default" | "outlined") + optional `style`.
-//   This changes how QuestCard and TaskListItem render badges.
-
 /**
  * Ember — Badge
  * Layer: UI

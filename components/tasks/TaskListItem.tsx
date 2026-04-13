@@ -1,8 +1,3 @@
-// 🔵 DECISION — replaced Aaron's TaskListItem with Kaley's version [Apr 2026]
-// ? Aaron: your version used onPress + Card + Badge (priority/tag badges).
-//   Kaley's uses onToggle (checkbox) with simpler row layout (checkbox + name + HP).
-//   Aaron's version showed priority/tag badges; Kaley's omits them for the Home screen compact view.
-
 /**
  * Ember — TaskListItem
  * Layer: UI

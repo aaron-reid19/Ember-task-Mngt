@@ -1,8 +1,3 @@
-// 🔵 DECISION — replaced Aaron's ember.ts with Kaley's version [Apr 2026]
-// ? Aaron: your version defined EmberState directly as a type literal here.
-//   Kaley's re-exports EmberState from constants/EmberStates.ts (canonical source).
-//   Also changed HPData/HPSnapshot from type to interface.
-
 /**
  * Ember — ember.ts types
  * Layer: UI

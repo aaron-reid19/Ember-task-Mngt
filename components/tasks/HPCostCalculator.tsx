@@ -1,7 +1,3 @@
-// 🔵 DECISION — replaced Aaron's HPCostCalculator (controlled) with Kaley's version (uncontrolled) [Apr 2026]
-// ? Aaron: your version was controlled (value + onValueChange props).
-//   Kaley's manages internal state (initialValue + onCostChange) and adds min/max bounds + Badge display.
-
 /**
  * Ember — HPCostCalculator
  * Layer: UI
@@ -31,6 +27,8 @@ interface HPCostCalculatorProps {
   onCostChange: (value: number) => void;
   min?: number;
   max?: number;
+  label?: string;
+  showBadge?: boolean;
 }
 
 // ~ ─────────────────────────────────────────────────────────────────
@@ -40,6 +38,8 @@ export function HPCostCalculator({
   onCostChange,
   min = 1,
   max = 50,
+  label = "HP COST",
+  showBadge = true,
 }: HPCostCalculatorProps) {
   // * Local interaction state — stepper value belongs here, not in the screen
   const [value, setValue] = useState(initialValue);
@@ -60,7 +60,7 @@ export function HPCostCalculator({
 
   return (
     <View style={styles.row}>
-      <Text style={styles.fieldLabel}>HP COST</Text>
+      {label ? <Text style={styles.fieldLabel}>{label}</Text> : null}
 
       <View style={styles.stepper}>
         <Pressable
@@ -90,8 +90,7 @@ export function HPCostCalculator({
         </Pressable>
       </View>
 
-      {/* Badge shows the current value in HP notation */}
-      <Badge label={`+${value} HP`} variant="outlined" />
+      {showBadge && <Badge label={`+${value} HP`} variant="outlined" />}
     </View>
   );
 }

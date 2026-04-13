@@ -1,8 +1,3 @@
-// 🔵 DECISION — replaced Aaron's EmberCreature (emoji placeholders) with Kaley's sprite-based version [Apr 2026]
-// ? Aaron: your version used emoji + useCreatureAnimations hook from EmberAnimations.tsx.
-//   Kaley's uses sprite image assets + direct Reanimated logic. Also adds isBonfire prop.
-//   EmberAnimations.tsx is no longer imported — can be removed if not used elsewhere.
-
 /**
  * Ember — EmberCreature
  * Layer: UI
@@ -42,14 +37,12 @@ import Colors from "@/constants/Colors";
 
 // ~ ─────────────────────────────────────────────────────────────────
 
-// 🟡 STUB — placeholder PNG files exist but are empty (0 bytes)
-// ⚪ DEFERRED — sprite assets awaited from design export; placeholder PNGs are functional
-// ^ empty PNGs render as blank space — expected during development
+// ^ Real sprite assets in assets/images/ember-states/ — using first frame per state
 const EMBER_SPRITES: Record<EmberState, ImageSourcePropType> = {
   Thriving: require("@/assets/images/ember-thriving.png"),
-  Steady: require("@/assets/images/ember-steady.png"),
-  Strained: require("@/assets/images/ember-strained.png"),
-  Flickering: require("@/assets/images/ember-flickering.png"),
+  Steady: require("@/assets/images/ember-states/ember-steady1.png"),
+  Strained: require("@/assets/images/ember-states/ember-strain1.png"),
+  Flickering: require("@/assets/images/ember-states/ember-flicker1.png"),
 };
 
 // ~ ─────────────────────────────────────────────────────────────────

@@ -1,5 +1,3 @@
-// 🔵 DECISION — replaced Aaron's task.ts with Kaley's version [Apr 2026]
-// ? Aaron: key differences from your version:
 //   - TaskTag changed from union ("work"|"personal"|...) to string (free-form)
 //   - Task changed from type to interface
 //   - Added isDailySpark field (needed by Kaley's screens for spark indicators)

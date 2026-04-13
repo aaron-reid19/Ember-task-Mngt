@@ -1,10 +1,3 @@
-// 🔵 DECISION — merged Aaron's tab navigator with Kaley's spec tabs [Apr 2026]
-// ? Aaron: your layout had 4 tabs: Home, Quests, Tasks, Profile.
-//   Spec defines 4 tabs: Home, Quest Board, Add Quest, Profile.
-//   Resolution: Added "Add Quest" tab, renamed "Quests" to "Quest Board".
-//   Tasks and Quest Detail are kept as hidden routes (accessible via navigation, not tab bar).
-//   This gives 4 visible tabs matching Figma + keeps Aaron's task screens accessible.
-
 /**
  * Ember — Tab Navigator Layout
  * Layer: UI

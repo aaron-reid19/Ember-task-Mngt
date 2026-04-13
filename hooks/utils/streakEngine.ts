@@ -14,7 +14,7 @@
  *  - Kaley's branch: HPSnapshot type from @/types/ember — Kaley — PENDING MERGE
  */
 
-import { HPSnapshot } from "@/types/ember";
+import { HPSnapshot } from "@/types";
 
 export function calculateStreak( snapshots: HPSnapshot[] ): number {
   let streakCounter = 0;

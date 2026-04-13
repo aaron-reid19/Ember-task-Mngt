@@ -3,7 +3,7 @@
  * Layer: UI
  * Owner: Kaley
  * Task IDs: U7
- * Status: 🟡 STUB
+ * Status: 🟢 READY
  *
  * Dependencies:
  *   - L3: useTask(id) hook returning a single Task — Josh — PENDING
@@ -36,13 +36,14 @@
  *   └──────────────────────────────────┘
  */
 
-import { View, Text, TextInput, ScrollView, StyleSheet } from "react-native";
+import { View, Text, TextInput, ScrollView, StyleSheet, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import type { TaskPriority } from "@/types";
+import { Ionicons } from "@expo/vector-icons";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -50,6 +51,9 @@ import { HPCostCalculator } from "@/components/tasks/HPCostCalculator";
 import Colors from "@/constants/Colors";
 import { Spacing } from "@/constants/Spacing";
 import { Typography } from "@/constants/Typography";
+import { useTask } from "@/hooks/useTask";
+import { useAuth } from "@/store/authContext";
+import { updateTask } from "@/services/FirestoreServices";
 
 // Zod schema — validation rules for the task edit form
 const taskSchema = z.object({
@@ -67,47 +71,42 @@ const PRIORITY_BADGE_COLORS: Record<TaskPriority, string> = {
 };
 
 export default function TaskEditScreen() {
-  // Read the task ID from the dynamic route: tasks/[id]
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { task, loading } = useTask(id);
+  const { user } = useAuth();
+  const router = useRouter();
 
-  // ┌──────────────────────────────────────────────────────────────┐
-  // │ STUB: TASK DATA (form defaults)                              │
-  // │ 🟡 STUB [L3] — replace with useTask(id) to load real values │
-  // │ Owner: Kaley | Replaces: task data from useTask(id)          │
-  // │                                                              │
-  // │ ← JOSH: plug useTask(id) here. It must return a Task.       │
-  // │   Then pass task values as defaultValues to useForm below.   │
-  // └──────────────────────────────────────────────────────────────┘
   const { control, handleSubmit, formState: { errors }, setValue, watch } = useForm<TaskFormData>({
     resolver: zodResolver(taskSchema),
     defaultValues: {
-      name: "Finish project proposal",
-      priority: "high",
-      hpCost: 20,
+      name: task?.name ?? "",
+      priority: task?.priority ?? "medium",
+      hpCost: task?.hpCost ?? 10,
     },
   });
 
   const selectedPriority = watch("priority");
 
-  const onSubmit = (data: TaskFormData) => {
-    // ┌──────────────────────────────────────────────────────────────┐
-    // │ 🔴 BLOCKED [D7] — waiting on Aaron's Task CRUD              │
-    // │ Unblock: FirestoreService.updateTask() must exist            │
-    // │ ! do not ship the save button until this is resolved         │
-    // │                                                              │
-    // │ ← AARON: when D7 lands, uncomment and use:                  │
-    // │   await FirestoreService.updateTask(id, {                    │
-    // │     name: data.name,                                         │
-    // │     priority: data.priority,                                 │
-    // │     hpCost: data.hpCost,                                     │
-    // │   });                                                        │
-    // └──────────────────────────────────────────────────────────────┘
+  const onSubmit = async (data: TaskFormData) => {
+    if (!user) return;
+    await updateTask(user.uid, id, {
+      title: data.name,
+      priority: data.priority,
+      hpCost: data.hpCost,
+    });
+    router.back();
   };
 
   return (
     <SafeAreaView style={styles.screenContainer}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.screenTitle}>Edit Task</Text>
+        <View style={styles.headerRow}>
+          <Pressable onPress={() => router.back()} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color={Colors.textPrimary} />
+          </Pressable>
+          <Text style={styles.screenTitle}>Edit Task</Text>
+          <View style={{ width: 32 }} />
+        </View>
 
         <Card>
           {/* Task name input */}
@@ -169,6 +168,14 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: Spacing.screen,
     gap: Spacing.xl,
+  },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  backButton: {
+    padding: Spacing.xs,
   },
   screenTitle: {
     color: Colors.textPrimary,

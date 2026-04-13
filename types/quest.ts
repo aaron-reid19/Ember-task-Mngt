@@ -1,5 +1,3 @@
-// 🔵 DECISION — replaced Aaron's quest.ts with Kaley's version [Apr 2026]
-// ? Aaron: key differences from your version:
 //   - QuestCadence values are now Capitalized ("Once"|"Daily"|...) not lowercase ("today"|"daily"|...)
 //   - Renamed hpReward → hpCost (Kaley's screens and components reference hpCost)
 //   - Quest changed from type to interface

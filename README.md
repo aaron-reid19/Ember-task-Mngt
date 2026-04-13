@@ -22,13 +22,13 @@ See Wiki for more information
 
 ## How the app works
 
-During onboarding the user picks a daily task goal — say, 5 tasks. That number becomes the denominator in the HP formula:
+During onboarding the user picks a daily task goal as a personal target. Ember's HP is driven by the actual HP cost of tasks:
 
 ```
-HP = (Completed Tasks ÷ Daily Goal) × 100
+HP = (Sum of completed task hpCosts ÷ Sum of all task hpCosts) × 100
 ```
 
-Every task you add costs HP. Every task you complete gives it back. The goal is to end the day at 100%.
+Every task you add lowers HP (the denominator grows). Every task you complete raises it back. The goal is to end the day at 100%.
 
 One task each day is randomly picked as the **Daily Spark** — completing it gives bonus HP. If you hit 100% HP *and* complete the Spark, **Bonfire Mode** triggers and Ember goes full celebration mode.
 
@@ -367,7 +367,7 @@ All three profile components get their data as props from the Profile screen. No
 
 **Josh**
 
-- [ ] `L1` HP ratio engine: `(completed / goal) × 100` · `needs: types/ember.ts`
+- [ ] `L1` HP ratio engine: `(completedHP / totalHP) × 100` based on task hpCost values · `needs: types/ember.ts`
 - [ ] `L2` HP state classifier: maps HP % to a state label · `needs: L1, EmberStates.ts`
 - [ ] `L3` Task cost logic: add subtracts HP, complete restores · `needs: L1`
 - [ ] `L7` Quest recurrence logic: all cadence types · `needs: types/quest.ts`

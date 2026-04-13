@@ -1,9 +1,3 @@
-// 🔵 DECISION — replaced Aaron's EmberStates.ts with Kaley's version [Apr 2026]
-// ? Aaron: your version imported EmberState from @/types and Colors from ./Colors.
-//   Kaley's defines EmberState here (canonical source) and uses inline hex values.
-//   Kaley's also adds creatureScale and creatureOpacity for EmberCreature animations.
-//   types/ember.ts re-exports EmberState from here — that's the intended direction.
-
 /**
  * Ember — EmberStates
  * Layer: UI + Logic (shared contract)

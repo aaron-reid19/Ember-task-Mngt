@@ -32,6 +32,7 @@ import {
   View,
   Pressable,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -42,6 +43,8 @@ import Colors from "@/constants/Colors";
 import { Typography } from "@/constants/Typography";
 import { Spacing } from "@/constants/Spacing";
 import { QuestCadence, WeekDay } from "@/types";
+import { useAuth } from "@/store/authContext";
+import { createQuest } from "@/services/FirestoreServices";
 
 // Zod schema — validation rules for the add quest form
 const questSchema = z.object({
@@ -73,6 +76,8 @@ const DAYS: { label: string; value: WeekDay }[] = [
 // ~ ─────────────────────────────────────────────────────────────────
 
 export default function AddQuestScreen() {
+  const { user } = useAuth();
+
   // * All form state managed by React Hook Form + Zod
   const { control, handleSubmit, formState: { errors }, setValue, watch } = useForm<QuestFormData>({
     resolver: zodResolver(questSchema),
@@ -101,14 +106,15 @@ export default function AddQuestScreen() {
     setValue("activeDays", next);
   }
 
-  function onSubmit(data: QuestFormData) {
-    // 🔴 BLOCKED [D8] — waiting on Aaron's Quest CRUD in Firestore
-    // Unblock: FirestoreService.createQuest() must exist and accept a Quest object
-    // & see D8 in the build plan — Aaron's Wave 2 task
-    // ! HP deduction on creation is Josh's L3 — do not write that logic here
-    // await FirestoreService.createQuest({ name: data.name, hpCost: data.hpCost, ... });
-
-    console.log("🟡 STUB: save quest tapped", data);
+  async function onSubmit(data: QuestFormData) {
+    if (!user) return;
+    await createQuest(user.uid, {
+      title: data.name,
+      description: data.description ?? "",
+      hpReward: data.hpCost,
+      cadence: data.frequency.toLowerCase() as any,
+      recurrenceRule: data.activeDays.length > 0 ? data.activeDays.join(",") : null,
+    });
     router.back();
   }
 
@@ -119,8 +125,8 @@ export default function AddQuestScreen() {
   // ~ ───────────────────────────────────────────────────────────────
 
   return (
+    <SafeAreaView style={styles.screen} edges={["top"]}>
     <ScrollView
-      style={styles.screen}
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
@@ -267,6 +273,7 @@ export default function AddQuestScreen() {
       <Button label="Save Quest" onPress={handleSubmit(onSubmit)} variant="primary" />
       <Button label="Discard" onPress={handleDiscard} variant="secondary" />
     </ScrollView>
+    </SafeAreaView>
   );
 }
 

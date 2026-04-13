@@ -12,7 +12,7 @@
  *  - Kaley's branch: Task type from @/types/task — Kaley — PENDING MERGE
  */
 
-import { Task } from "@/types/task";
+import { Task } from "@/types";
 
 /** Randomly selects a task to be designated as the Daily Spark */
 export function selectDailySpark(tasks: Task[]): Task | null {
