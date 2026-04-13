@@ -1,3 +1,9 @@
+export type EmberState = "Thriving" | "Steady" | "Strained" |"Flickering";
+
+export interface LocalEmberData {
+    hp: number;
+    visualState: EmberState;
+}
 // 🔵 DECISION — replaced Aaron's ember.ts with Kaley's version [Apr 2026]
 // ? Aaron: your version defined EmberState directly as a type literal here.
 //   Kaley's re-exports EmberState from constants/EmberStates.ts (canonical source).

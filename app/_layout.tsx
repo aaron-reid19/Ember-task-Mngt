@@ -61,11 +61,18 @@ export default function RootLayout() {
     </SafeAreaProvider>
   );
 import { AuthProvider } from "@/context/authContext";
+import { setupNotificationChannels } from "@/services/NotificationService";
+import { useEffect } from "react";
+
 
 export default function RootLayout() {
+  useEffect(() => {
+    setupNotificationChannels();
+  }, [])
   return (
+
     <AuthProvider>
-    <Stack />;
+    <Stack />
   </AuthProvider>
   
   )
