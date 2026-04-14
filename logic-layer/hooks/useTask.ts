@@ -21,6 +21,7 @@ import { useAuth } from "@/context/authContext";
 import { getTaskById } from "@/services/FirestoreServices";
 
 import { Task } from "@/types";
+import { StringFormatParams } from "zod/v4/core";
 
 export function useTask( id: string ): Task | null {
   const [task, setTask] = useState<Task | null>(null);
@@ -32,7 +33,9 @@ export function useTask( id: string ): Task | null {
     async function fetchTask() {
       try {
         // Returns null if the document doesn't exist in Firestore
-        const data = await getTaskById(user!.uid, id);
+        // ^ This works, but it could be better if getTaskById is fixed
+        // ! getTaskById in FirestoreServices.ts is not typed on the return side
+        const data = await getTaskById(user!.uid, id) as Record<string, any>;;
 
         if (!data) {
           console.warn(`useTask: no task found with id ${id}`);
