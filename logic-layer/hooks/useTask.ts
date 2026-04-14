@@ -3,7 +3,7 @@
  * Layer: Logic
  * Owner: Josh
  * Task IDs: L3, L4
- * Status: 🔴 ERROR
+ * Status: 🟢 COMPLETE
  * 
  * Notes: 
  *  - Returns a single task by ID, or null if not found / still loading

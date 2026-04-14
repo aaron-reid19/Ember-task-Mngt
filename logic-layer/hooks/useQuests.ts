@@ -3,7 +3,7 @@
  * Layer: Logic
  * Owner: Josh
  * Task IDs: L7
- * Status: 🔴 ERROR
+ * Status: 🟢 COMPLETE
  * 
  * Notes: 
  *  - Fetches all quests and applies two layers of filtering:

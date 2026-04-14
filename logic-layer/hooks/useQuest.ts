@@ -3,7 +3,7 @@
  * Layer: Logic
  * Owner: Josh
  * Task IDs: L7
- * Status: 🟡 STUB
+ * Status: 🟢 COMPLETE
  * 
  * Notes: 
  *  - Returns a single quest by ID, or null if not found / still loading

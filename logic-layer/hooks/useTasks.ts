@@ -3,7 +3,7 @@
  * Layer: Logic
  * Owner: Josh
  * Task IDs: L3, L4
- * Status: 🔴 ERROR
+ * Status: 🟢 COMPLETE
  * 
  * Notes:
  *  - Fetches all tasks for the current user from Firestore
