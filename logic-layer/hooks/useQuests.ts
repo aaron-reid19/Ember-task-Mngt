@@ -6,28 +6,83 @@
  * Status: 🟡 STUB
  * 
  * Notes: 
- *  - Returns a full list of Quests to any screen that requires them
+ *  - Fetches all quests and applies two layers of filtering:
+ *    1. isQuestDueToday — removes quests not relevant today
+ *    2. cadence param — optional filter for the Quest Board tab bar
+ *  - 🔴 SCHEMA MISMATCHES:
+ *    · Aaron cadence lowercase → Kaley QuestCadence Capitalized
+ *    · Aaron "hpReward" → Kaley "hpCost"
+ *    · Aaron "title" → Kaley "name"
+ *    · Aaron has no isDailySpark — defaulted to false
  * 
  * Dependencies: 
- *  - Kaley's branch: Task from @/types/quest — Kaley — PENDING MERGE
- *  - D8: Quest CRUD — Aaron — PENDING
+ *  - Data Layer - FirestoreServices: getQuests(uid) 
+ *  - Data Layer - authContext: useAuth() 
+ *  - Logic Layer - isQuestDueToday from questEngine
+ *  - Types - Quest, QuestCadence from @/types 
  */
 
+import { useState, useEffect } from "react";
+import { useAuth } from "@/context/authContext";
+import { getQuests } from "@/services/FirestoreServices";
+import { isQuestDueToday } from "../utils/questEngine";
 import { Quest, QuestCadence } from "@/types/quest";
 
+const CADENCE_MAP: Record<string, QuestCadence> = {
+  today: "Once",
+  daily: "Daily",
+  weekly: "Weekly",
+  biweekly: "Biweekly",
+  monthly: "Monthly",
+  custom: "Custom",
+};
+
 export function useQuests(cadence?: QuestCadence): Quest[] {
-  // ^ STUB VALUES: Must be changed once data layer exists
-  return [
-    {
-      id: "4321", name: "Wash Dishes",
-      // description?: string;    
-      hpCost: 10,          // displayed as "+20 pts" on QuestCard
-      cadence: "Daily",
-      // activeDays?: WeekDay[];  // only relevant when cadence is "Weekly"
-      // startDate?: string;      // ISO date string — set in Add Quest form
-      completed: true,
-      isDailySpark: false,   // true if this quest was selected as today's Spark
-      status: "complete"
-    }
-  ]
+  const [quests, setQuests] = useState<Quest[]>([]);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (!user) return;
+
+    async function fetchQuests() {
+      try {
+        const raw = await getQuests(user!.uid);
+
+        const mapped: Quest[] = raw.map((data) => {
+          // Map cadence — fall back to "Once" if Firestore has an unrecognized value
+          const mappedCadence: QuestCadence = CADENCE_MAP[data.cadence] ?? "Once";
+
+          return {
+            return {
+            id: data.id,
+            name: data.title,               // SCHEMA MISMATCH: title → name
+            description: data.description ?? undefined,
+            hpCost: data.hpReward ?? 0,     // SCHEMA MISMATCH: hpReward → hpCost
+            cadence: mappedCadence,
+            activeDays: data.activeDays ?? undefined,
+            startDate: data.startDate ?? undefined,
+            completed: data.completed ?? false,
+            isDailySpark: false,            // Aaron's schema has no isDailySpark on quests
+            status: data.completed ? "complete" : "in progress",
+          };
+        });
+
+        // Filter 1: only show quests that are due today based on cadence/recurrence
+        const dueToday = mapped.filter((q) => isQuestDueToday(q, new Date()));
+
+        // Filter 2: if the Quest Board passed a cadence tab, filter to that tab
+        const filtered = cadence
+          ? dueToday.filter((q) => q.cadence === cadence)
+          : dueToday;
+
+        setQuests(filtered);
+      } catch (error) {
+        console.error("useQuests: failed to fetch quests", error);
+      }
+
+      fetchQuests();
+    }, [user, cadence]);
+    
+    return quests;
 }
+        
