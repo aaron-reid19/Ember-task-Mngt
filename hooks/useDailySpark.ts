@@ -22,7 +22,7 @@ import { useTasks } from "./useTasks";
 import { selectDailySpark } from "../utils/sparkEngine";
 import { Task } from "@/types/task";
 
-export function useDailySpark (): Task | null {
+export function useDailySpark(): Task | null {
   const [spark, setSpark] = useState<Task | null>(null);
   const tasks = useTasks();
 

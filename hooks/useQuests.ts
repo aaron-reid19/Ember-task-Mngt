@@ -87,7 +87,6 @@ export function useQuests(cadence?: QuestCadence): Quest[] {
 
     fetchQuests();
   }, [user, cadence]);
-  
+
   return quests;
 }
-        

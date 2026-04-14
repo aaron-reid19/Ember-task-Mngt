@@ -24,9 +24,9 @@ type StreakData = {
 }
 
 export function useStreak(): StreakData {
-  
+
   const [streakData, setStreakData] = useState<StreakData>({
-    current: 0, 
+    current: 0,
     longest: 0,
   });
 
@@ -40,7 +40,7 @@ export function useStreak(): StreakData {
     const longest = calculateLongestStreak(history);
 
     setStreakData({ current, longest });
-  }, [history]); 
+  }, [history]);
 
-  return streakData;    
+  return streakData;
 }

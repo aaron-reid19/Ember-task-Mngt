@@ -54,7 +54,7 @@ export function useEmber(): HPData {
     }
 
     loadCachedHP();
-  }, []); 
+  }, []);
 
   // STEP 2: When tasks + user are loaded, recompute HP from real data
   // This is the authoritative calculation that overrides the cached value
