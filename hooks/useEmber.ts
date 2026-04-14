@@ -3,7 +3,7 @@
  * Layer: Logic
  * Owner: Josh
  * Task IDs: L1, L2, L5
- * Status: 🟡 STUB
+ * Status: 🟢 COMPLETE
  * 
  * Notes: 
  *  - On mount: loads cached HP from AsyncStorage immediately (instant display)
