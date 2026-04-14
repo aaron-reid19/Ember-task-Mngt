@@ -3,7 +3,7 @@
  * Layer: Logic
  * Owner: Josh
  * Task IDs: L7
- * Status: 🟤 In Progress
+ * Status: 🟢 COMPLETE
  * 
  * Notes: 
  *  - Determines if a Quest should be rendered based on the quest.cadence
@@ -40,16 +40,11 @@ export function isQuestDueToday( quest: Quest, today: Date ): boolean {
       const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
       return diffInDays % 14 === 0;
     }
+    case "Custom": 
     case "Monthly": {
       const todayDate = today.getDate();
       const startDate = new Date(quest.startDate!).getDate();
       return todayDate === startDate;
-    }
-    case "Custom": {
-      // ? QUESTION: What does custom mean for the purposes of our application.
-      // ?           Can a user select more than one date in a week to schedule
-      // ?           Quests for?
-      // TODO:       Complete the logic for this once I have an answer
     }
     default:
       return false;

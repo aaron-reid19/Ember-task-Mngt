@@ -3,13 +3,13 @@
  * Layer: Logic
  * Owner: Josh
  * Task IDs: L4
- * Status: 🟤 In Progress
+ * Status: 🟢 COMPLETE
  * 
  * Notes: 
  *  - Randomly selects a task to be designated as the Daily Spark
  * 
  * Dependencies: 
- *  - Kaley's branch: Task type from @/types/task — Kaley — PENDING MERGE
+ *  - Task type from @/types/task
  */
 
 import { Task } from "@/types/task";
