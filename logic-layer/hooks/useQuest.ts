@@ -39,7 +39,9 @@ export function useQuest( id: string ): Quest | null {
 
     async function fetchQuest() {
       try {
-        const data = await getQuestById(user!.uid, id);
+        // ^ This works, but it could be better if getQuestById is fixed
+        // ! getQuestById in FirestoreServices.ts is not typed on the return side
+        const data = await getQuestById(user!.uid, id) as Record<string, any>;
 
         if (!data) {
           console.warn(`useQuest: no quest found with id ${id}`);
