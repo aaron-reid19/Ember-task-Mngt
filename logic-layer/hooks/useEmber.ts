@@ -65,7 +65,7 @@ export function useEmber(): HPData {
       try {
         // Load the user's profile to get their dailyGoal setting
         // ? I believe we are changing this - I'll code for now
-        const profile = await getUserProfile(user!.uid);
+        const profile = await getUserProfile(user!.uid) as Record<string, any>;
         const dailyGoal: number = profile?.dailyGoal ?? 5;
 
         // Count how many tasks are complete for today
