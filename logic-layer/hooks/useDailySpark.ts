@@ -3,27 +3,35 @@
  * Layer: Logic
  * Owner: Josh
  * Task IDs: L4
- * Status: 🟡 STUB
+ * Status: 🟢 COMPLETE
  * 
  * Notes: 
- *  - Returns an single task that has been randomly selected as the Daily Spark
+ *  - Replaces hardcoded stub tasks with real data from useTasks()
+ *  - selectDailySpark internally filters for completed === false
+ *    so we don't need to pre-filter here
+ *  - Returns null if all tasks are done or no tasks exist
  * 
  * Dependencies: 
- *  - Kaley's branch: Task from @/types/task — Kaley — PENDING MERGE
- *  - D7: Task CRUD — Aaron — PENDING
+ *  - Logic Layer - useTasks (local hook) 
+ *  - Logic Layer - selectDailySpark from sparkEngine
+ *  - Types: Task from @/types
  */
 
-import { Task } from "@/types/task";
+import { useState, useEffect } from "react";
+import { useTasks } from "./useTasks";
 import { selectDailySpark } from "../utils/sparkEngine";
+import { Task } from "@/types/task";
 
 export function useDailySpark (): Task | null {
-  // ^ STUB VALUES: Must be changed once data layer exists
-  const tasks: Task[] = [
-    { id: "1", name: "Workout", hpCost: 10, completed: false, isDailySpark: false, priority: "high", tags: ["Fitness"], createdAt: "2026-04-11T09:00:00Z" },
-    { id: "2", name: "Read for 20 Minutes", hpCost: 5, completed: false, isDailySpark: false, priority: "low", tags: ["Learning"], createdAt: "2026-04-11T09:00:00Z" },
-    { id: "3", name: "Drink Water", hpCost: 3, completed: true, isDailySpark: false, priority: "medium", tags: ["Health"], createdAt: "2026-04-11T09:00:00Z" }
-  ];
+  const [spark, setSpark] = useState<Task | null>(null);
+  const tasks = useTasks();
 
-  const dailySpark = selectDailySpark(tasks);
-  return dailySpark;
+  useEffect(() => {
+    // selectDailySpark filters incomplete tasks and picks one randomly
+    // Will return null if no incomplete tasks remain
+    const selected = selectDailySpark(tasks);
+    setSpark(selected);
+  }, [tasks]); // Re-run whenever the task list updates
+
+  return spark;
 }
