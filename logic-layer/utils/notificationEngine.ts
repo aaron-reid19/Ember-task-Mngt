@@ -3,7 +3,7 @@
  * Layer: Logic
  * Owner: Josh
  * Task IDs: L8
- * Status: 🟤 In Progress
+ * Status: 🟢 COMPLETE
  * 
  * Notes: 
  *  - Schedules the three Ember notification types using expo-notifications
