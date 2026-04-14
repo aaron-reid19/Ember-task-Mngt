@@ -41,12 +41,15 @@ export function useTask( id: string ): Task | null {
 
         setTask({
           id: data.id,
-          name: data.title,     // ! SCHEMA MISMATCH: title or name???
+          name: data.title,         // TODO: remove once Kaley fixes duplicate Task definition in task.ts
+          title: data.title,        // ^ duplicate to satisfy stale Task definition
           hpCost: data.hpCost ?? 0,
           completed: data.completed ?? false,
+          isDailySpark: data.isDailySpark ?? false,
           priority: data.priority ?? "medium",
           tags: data.tags ?? [],
           createdAt: data.createdAt?.toDate?.()?.toISOString?.() ?? new Date().toISOString(),  
+          updatedAt: data.updatedAt?.toDate?.()?.toISOString?.() ?? new Date().toISOString(),
         });
       } catch (error) {
         console.error(`useTask: failed to fetch task ${id}`, error);

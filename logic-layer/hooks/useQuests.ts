@@ -3,7 +3,7 @@
  * Layer: Logic
  * Owner: Josh
  * Task IDs: L7
- * Status: 🟡 STUB
+ * Status: 🔴 ERROR
  * 
  * Notes: 
  *  - Fetches all quests and applies two layers of filtering:
@@ -26,8 +26,10 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/context/authContext";
 import { getQuests } from "@/services/FirestoreServices";
 import { isQuestDueToday } from "../utils/questEngine";
-import { Quest, QuestCadence } from "@/types/quest";
+import { Quest, QuestCadence } from "@/types";
 
+// ^ Maps Aaron's Firestore lowercase cadence → Kaley's capitalized QuestCadence
+// TODO: remove once cadence mismatch is corrected
 const CADENCE_MAP: Record<string, QuestCadence> = {
   today: "Once",
   daily: "Daily",
@@ -48,21 +50,23 @@ export function useQuests(cadence?: QuestCadence): Quest[] {
       try {
         const raw = await getQuests(user!.uid);
 
-        const mapped: Quest[] = raw.map((data) => {
+        // ^ FirestoreServices.ts returns an untyped array so data becomes implicit any
+        // ^ Record<string, any> tells TypeScript "this is an object with string keys 
+        // ^ and unknown value"
+        const mapped: Quest[] = raw.map((data: Record<string, any>) => {
           // Map cadence — fall back to "Once" if Firestore has an unrecognized value
           const mappedCadence: QuestCadence = CADENCE_MAP[data.cadence] ?? "Once";
 
           return {
-            return {
             id: data.id,
-            name: data.title,               // SCHEMA MISMATCH: title → name
+            name: data.title,               // ! SCHEMA MISMATCH: title → name
             description: data.description ?? undefined,
-            hpCost: data.hpReward ?? 0,     // SCHEMA MISMATCH: hpReward → hpCost
+            hpCost: data.hpReward ?? 0,     // ! SCHEMA MISMATCH: hpReward → hpCost
             cadence: mappedCadence,
             activeDays: data.activeDays ?? undefined,
             startDate: data.startDate ?? undefined,
             completed: data.completed ?? false,
-            isDailySpark: false,            // Aaron's schema has no isDailySpark on quests
+            isDailySpark: false,            // ! SCHEMA MISMATCH: schema has no isDailySpark on quests
             status: data.completed ? "complete" : "in progress",
           };
         });
@@ -79,10 +83,11 @@ export function useQuests(cadence?: QuestCadence): Quest[] {
       } catch (error) {
         console.error("useQuests: failed to fetch quests", error);
       }
+    }
 
-      fetchQuests();
-    }, [user, cadence]);
-    
-    return quests;
+    fetchQuests();
+  }, [user, cadence]);
+  
+  return quests;
 }
         

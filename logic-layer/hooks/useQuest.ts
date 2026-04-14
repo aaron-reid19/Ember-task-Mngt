@@ -6,26 +6,68 @@
  * Status: 🟡 STUB
  * 
  * Notes: 
- *  - Returns an single quest by id
+ *  - Returns a single quest by ID, or null if not found / still loading
+ *  - Same field + cadence mapping as useQuests
+ *  - Aaron's getQuestById() returns null if the doc doesn't exist
  * 
  * Dependencies: 
- *  - Kaley's branch: Task from @/types/quest — Kaley — PENDING MERGE
- *  - D8: Quest CRUD — Aaron — PENDING
+ *  - Data Layer - FirestoreServices: getQuestById(uid, questId)
+ *  - Data Layer - authContext: useAuth()
+ *  - Types: Quest, QuestCadence from @/types
  */
 
-import { Quest } from "@/types/quest";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/context/authContext";
+import { getQuestById } from "@/services/FirestoreServices";
+import { Quest, QuestCadence } from "@/types";
 
-export function useQuest( id: string ): Quest {
-  // ^ STUB VALUES: Must be changed once data layer exists
-  return {
-    id: "4321", name: "Wash Dishes",
-    // description?: string;    
-    hpCost: 10,          // displayed as "+20 pts" on QuestCard
-    cadence: "Daily",
-    // activeDays?: WeekDay[];  // only relevant when cadence is "Weekly"
-    // startDate?: string;      // ISO date string — set in Add Quest form
-    completed: true,
-    isDailySpark: false,   // true if this quest was selected as today's Spark
-    status: "complete"
-  }
+const CADENCE_MAP: Record<string, QuestCadence> = {
+  today:     "Once",
+  daily:     "Daily",
+  weekly:    "Weekly",
+  biweekly:  "Biweekly",
+  monthly:   "Monthly",
+  custom:    "Custom",
+};
+
+export function useQuest( id: string ): Quest | null {
+  const [quest, setQuest] = useState<Quest | null>(null);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (!user || !id) return;
+
+    async function fetchQuest() {
+      try {
+        const data = await getQuestById(user!.uid, id);
+
+        if (!data) {
+          console.warn(`useQuest: no quest found with id ${id}`);
+          return;
+        }
+
+        const mappedCadence: QuestCadence = CADENCE_MAP[data.cadence] ?? "Once";
+
+        setQuest({
+          id: data.id,
+          name: data.title,
+          description: data.description ?? undefined,
+          hpCost: data.hpReward ?? 0,
+          cadence: mappedCadence,
+          activeDays: data.activeDays ?? undefined,
+          startDate: data.startDate ?? undefined,
+          completed: data.completed ?? false,
+          isDailySpark: false,
+          status: data.completed ? "complete" : "in progress",
+        });
+
+      } catch (error) {
+          console.error(`useQuest: failed to fetch quest ${id}`, error);
+      }
+    }
+
+    fetchQuest();
+  }, [user, id]);
+
+  return quest;
 }

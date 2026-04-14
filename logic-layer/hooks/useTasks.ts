@@ -36,29 +36,27 @@ export function useTasks(): Task[] {
       try {
         const raw = await getTasks(user!.uid);
 
-        const mapped: Task[] = raw.map((data) => ({
+        // ^ FirestoreServices.ts returns an untyped array so data becomes implicit any
+        // ^ Record<string, any> tells TypeScript "this is an object with string keys 
+        // ^ and unknown value"
+        const mapped: Task[] = raw.map((data: Record<string, any>) => ({
           id: data.id,
-
-          // ! SCHEMA MISMATCH: Firestore field is "title. Task type uses "name"
           name: data.title,
-
+          title: data.title,        // TODO: remove once Kaley fixes duplicate Task definition in task.ts
           hpCost: data.hpCost ?? 0,
           completed: data.completed ?? false,
           isDailySpark: data.isDailySpark ?? false,
           priority: data.priority ?? "medium",
           tags: data.tags ?? [],
-
-          // Firestore Timestamp -> ISO string
-          // .toDate converts Timestamp to JS Date, .toISOString() to string
-          // Falls back to now if createdAt is missing
-          createdAt: data.createAt?.toDate?.()?.toISOString?.() ?? new Date().toISOString(),
+          createdAt: data.createdAt?.toDate?.()?.toISOString?.() ?? new Date().toISOString(),
+          updatedAt: data.updatedAt?.toDate?.()?.toISOString?.() ?? new Date().toISOString(),
         }));
 
         setTasks(mapped);
       } catch (error) {
         console.error("useTasks: failed to fetch tasks", error);
-        }
-    }
+      }    
+    }      
     
     fetchTasks();
   }, [user]);
