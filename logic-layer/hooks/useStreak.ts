@@ -3,14 +3,20 @@
  * Layer: Logic
  * Owner: Josh
  * Task IDs: L6
- * Status: 🟡 STUB
+ * Status: 🟢 COMPLETE
  * 
  * Notes: 
- *  - Returns streak data — both the current steak and the longest streak
+ *  - Derives current and longest streak from real HP history
+ *  - UseHPHistory handles all Firestore fetching
  * 
  * Dependencies: 
- *  - D9: History and Streak Tracking — Aaron — PENDING
+ *  - useHPHistory (local hook)
+ *  - calculateStreak, calculateLongestStreak from streakEngine
  */
+
+import { useState, useEffect } from "react";
+import { useHPHistory } from "./useHPHistory";
+import { calculateStreak, calculateLongestStreak } from "../utils/streakEngine";
 
 type StreakData = {
   current: number
@@ -18,8 +24,23 @@ type StreakData = {
 }
 
 export function useStreak(): StreakData {
-  // ^ STUB VALUES: Must be changed once data layer exists
-  return {
-    current: 7, longest: 25
-  }
+  
+  const [streakData, setStreakData] = useState<StreakData>({
+    current: 0, 
+    longest: 0,
+  });
+
+  // Pull the real HP history array from Firestore (via useHPHistory)
+  const history = useHPHistory();
+
+  useEffect(() => {
+    if (history.length === 0) return;
+
+    const current = calculateStreak(history);
+    const longest = calculateLongestStreak(history);
+
+    setStreakData({ current, longest });
+  }, [history]); 
+
+  return streakData;    
 }

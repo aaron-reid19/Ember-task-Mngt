@@ -3,24 +3,51 @@
  * Layer: Logic
  * Owner: Josh
  * Task IDs: L6
- * Status: 🟡 STUB
- * 
- * Notes: 
- *  - Returns HP over time
- * 
- * Dependencies: 
- *  - Kaley's branch: HPSnapshot type from @/types/ember — Kaley — PENDING MERGE
- *  - D9: History and Streak Tracking — Aaron — PENDING
+ * Status: 🟢 COMPLETE
+ *
+ * Notes:
+ *  - Reads the full HP history from Firestore hpHistory subcollection
+ *  - Re-derives state from hp via classifyHP so we are always consistent
+ *    with current threshold definitions, regardless of what was persisted
+ *
+ * Dependencies:
+ *  - Kaley's branch: HPSnapshot type from @/types/ember — Kaley — MERGED ✓
+ *  - Aaron's D9: saveDailyHPSnapshot writes to users/{uid}/hpHistory/{dateKey} — MERGED ✓
  */
 
+import { useState, useEffect } from "react";
+import { collection, getDocs, QueryDocumentSnapshot, DocumentData } from "firebase/firestore";
+import { db } from "@/firebase/config";
 import { HPSnapshot } from "@/types/ember";
+import { useAuth } from "@/context/authContext";
+import { classifyHP } from "../utils/hpEngine";
+
+function mapSnapshot(docSnap: QueryDocumentSnapshot<DocumentData>): HPSnapshot {
+  const d = docSnap.data();
+  const hp = typeof d.hp === "number" ? d.hp : 0;
+  return {
+    date: d.date ?? docSnap.id,
+    hp,
+    // Re-derive state from hp so it always matches current thresholds
+    state: classifyHP(hp),
+  };
+}
 
 export function useHPHistory(): HPSnapshot[] {
-  // ^ STUB VALUES: Must be changed once data layer exists
-  return [
-    { date: "2026-04-08T09:00:00Z", hp: 25, state: "Strained" },
-    { date: "2026-04-07T09:00:00Z", hp: 75, state: "Steady" },
-    { date: "2026-04-06T09:00:00Z", hp: 38, state: "Strained" },
-    { date: "2026-04-05T09:00:00Z", hp: 100, state: "Thriving" }
-  ]
+  const { user } = useAuth();
+  const [snapshots, setSnapshots] = useState<HPSnapshot[]>([]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    async function loadHistory() {
+      const historyRef = collection(db, "users", user!.uid, "hpHistory");
+      const snapshot = await getDocs(historyRef);
+      setSnapshots(snapshot.docs.map(mapSnapshot));
+    }
+
+    loadHistory().catch(console.error);
+  }, [user]);
+
+  return snapshots;
 }
