@@ -1,3 +1,21 @@
+export type TaskPriority = "low" | "medium" | "high";
+
+export interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  hpCost: number;
+  completed: boolean;
+  priority: TaskPriority;
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+
+export type NewTask = Omit<Task, "id" | "createdAt" | "updatedAt">;
+// 🔵 DECISION — replaced Aaron's task.ts with Kaley's version [Apr 2026]
+// ? Aaron: key differences from your version:
 //   - TaskTag changed from union ("work"|"personal"|...) to string (free-form)
 //   - Task changed from type to interface
 //   - Added isDailySpark field (needed by Kaley's screens for spark indicators)

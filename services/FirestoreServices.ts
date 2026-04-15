@@ -8,6 +8,9 @@ import { doc,
     getDoc,
     getDocs } from "firebase/firestore";
 import { db } from "./firebaseConfig";
+import { db } from "@/firebase/config";
+import type { LocalEmberData } from "@/types/ember";
+
 
 export type EmberState = "Thriving" | "Steady" | "Strained" | "Flickering";
 export type TaskPriority = "low" | "medium" | "high";
@@ -50,7 +53,7 @@ function profileRef (userId: string){
 export async function createUserProfile(userId: string, data?: UserProfileInput){
     await setDoc(profileRef(userId), {
         currentHP: 100,
-        emberState: "thriving",
+        emberState: "Thriving",
         bonfireActive: false,
         onboardingComplete: false,
         displayName: data?.displayName ?? null,
@@ -101,20 +104,20 @@ await updateDoc(profileRef(userId), {
 }
 
   // tasks
-export async function createTask(userId: string, task: TaskInput) {
-const tasksRef = collection(db, "users", userId, "tasks");
+  export async function createTask(userId: string, task: TaskInput): Promise<string> {
+    const tasksRef = collection(db, "users", userId, "tasks");
 
-const docRef = await addDoc(tasksRef, {
-    title: task.title,
-    notes: task.notes ?? "",
-    priority: task.priority,
-    tags: task.tags ?? [],
-    hpCost: task.hpCost,
-    completed: false,
-    isDailySpark: task.isDailySpark ?? false,
-    dueDate: task.dueDate ?? null,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
+    const docRef = await addDoc(tasksRef, {
+        title: task.title,
+        notes: task.notes ?? "",
+        priority: task.priority,
+        tags: task.tags ?? [],
+        hpCost: task.hpCost,
+        completed: false,
+        isDailySpark: task.isDailySpark ?? false,
+        dueDate: task.dueDate ?? null,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
 });
 
 return docRef.id;
@@ -129,6 +132,19 @@ return snapshot.docs.map((docSnap) => ({
     ...docSnap.data(),
 }));
 }
+export async function getTaskById(userId: string, taskId: string) {
+    const taskRef = doc(db, "users", userId, "tasks", taskId);
+    const snapshot = await getDoc(taskRef);
+  
+    if (!snapshot.exists()) {
+      return null;
+    }
+  
+    return {
+      id: snapshot.id,
+      ...snapshot.data(),
+    };
+  }
 
 export async function updateTask(
 userId: string,
@@ -151,6 +167,19 @@ await updateDoc(taskRef, {
     updatedAt: serverTimestamp(),
 });
 }
+
+export async function toggleTaskComplete(
+    userId: string,
+    taskId: string,
+    completed: boolean
+  ) {
+    const taskRef = doc(db, "users", userId, "tasks", taskId);
+  
+    await updateDoc(taskRef, {
+      completed,
+      updatedAt: serverTimestamp(),
+    });
+  }
 
 export async function deleteTask(userId: string, taskId: string) {
 await deleteDoc(doc(db, "users", userId, "tasks", taskId));
@@ -239,4 +268,78 @@ export async function createQuest(userId: string, quest: QuestInput) {
       id: docSnap.id,
       ...docSnap.data(),
     }));
+  }
+
+  export async function getQuestById(userId: string, questId: string) {
+    const questRef = doc(db, "users", userId, "quests", questId);
+    const snapshot = await getDoc(questRef);
+  
+    if (!snapshot.exists()) {
+      return null;
+    }
+  
+    return {
+      id: snapshot.id,
+      ...snapshot.data(),
+    };
+  }
+
+  export async function updateQuest(
+    userId: string,
+    questId: string,
+    updates: Partial<{
+      title: string;
+      description: string;
+      hpReward: number;
+      cadence: QuestCadence;
+      recurrenceRule: string | null;
+      completed: boolean;
+    }>
+  ) {
+    const questRef = doc(db, "users", userId, "quests", questId);
+  
+    await updateDoc(questRef, {
+      ...updates,
+      updatedAt: serverTimestamp(),
+    });
+  }
+
+export async function deleteQuest(userId: string, questId: string) {
+    await deleteDoc(doc(db, "users", userId, "quests", questId));
+  }
+
+  export async function saveHPStateToFirestore(
+    userId: string,
+    data: LocalEmberData
+    ): Promise<void> {
+        const emberRef = doc(db, "users", userId, "ember", "current");
+
+        await setDoc(
+        emberRef,
+    {
+      hp: data.hp,
+      visualState: data.visualState,
+      updatedAt: serverTimestamp(),
+    },
+    { merge: true }
+  );
+}
+
+export async function saveDailyHPSnapshot(
+    userId: string,
+    data: LocalEmberData
+  ): Promise<void> {
+    const dateKey = new Date().toISOString().split("T")[0];
+    const snapshotRef = doc(db, "users", userId, "hpHistory", dateKey);
+  
+    await setDoc(
+      snapshotRef,
+      {
+        date: dateKey,
+        hp: data.hp,
+        visualState: data.visualState,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
   }
