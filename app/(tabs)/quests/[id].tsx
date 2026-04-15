@@ -1,13 +1,9 @@
-// 🔵 DECISION — replaced Aaron's Quest Detail scaffold with Kaley's Figma implementation [Apr 2026]
-// ? Aaron: Kaley's version has centered detail card, spark badge, HPBar visualization, and "Back to Dashboard" button.
-//   Your version used Card component wrapper + hpReward. Kaley's uses hpCost + custom detail card layout.
-
 /**
  * Ember — Quest Detail Screen
  * Layer: UI
  * Owner: Kaley
  * Task IDs: U5
- * Status: 🟡 STUB
+ * Status: 🟢 READY
  *
  * Dependencies:
  *   - L7: useQuest(id) returning single quest — Josh — PENDING
@@ -30,57 +26,55 @@ import {
   StyleSheet,
   Text,
   View,
+  Pressable,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { HPBar } from "@/components/ui/HPBar";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import Colors from "@/constants/Colors";
 import { Typography } from "@/constants/Typography";
 import { Spacing } from "@/constants/Spacing";
-import { Quest } from "@/types";
-
-// ~ ─────────────────────────────────────────────────────────────────
-// ~ STUB DATA
-// ~ ─────────────────────────────────────────────────────────────────
-
-// 🟡 STUB [L7] — replace with useQuest(id) when Josh's hook is done
-// Owner: Kaley | Replaces: quest from useQuest(id)
-const stubQuest: Quest = {
-  id: "q1",
-  name: "Clean Bathroom",
-  hpCost: 20,
-  completed: false,
-  isDailySpark: true,
-  cadence: "Daily",
-  status: "in progress",
-};
-
-// ~ ─────────────────────────────────────────────────────────────────
+import { useQuest } from "@/hooks/useQuest";
+import { useAuth } from "@/store/authContext";
+import { updateQuest } from "@/services/FirestoreServices";
 
 export default function QuestDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  // ← JOSH: plug useQuest(id) here — needs { quest }
-  // ^ if hook isn't ready, stub quest above is used for all IDs
+  const { quest, loading } = useQuest(id);
+  const { user } = useAuth();
 
-  const quest = stubQuest; // 🟡 STUB — replace with useQuest(id)
+  async function handleMarkComplete() {
+    if (!user || !id) return;
+    await updateQuest(user.uid, id, { completed: true });
+    router.replace("/(tabs)/quests");
+  }
 
-  function handleMarkComplete() {
-    // 🔴 BLOCKED [L3, D8] — waiting on Josh's task cost logic + Aaron's Quest CRUD
-    // Unblock: FirestoreService.completeQuest() must exist
-    // ! do not ship until blocker is cleared
-    console.log("🟡 STUB: mark complete tapped for", id);
+  if (loading || !quest) {
+    return (
+      <SafeAreaView style={styles.screen} edges={["top"]}>
+        <Text style={{ color: Colors.textSecondary, textAlign: "center", marginTop: 100 }}>
+          {loading ? "Loading..." : "Quest not found"}
+        </Text>
+      </SafeAreaView>
+    );
   }
 
   return (
+    <SafeAreaView style={styles.screen} edges={["top"]}>
     <ScrollView
-      style={styles.screen}
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
     >
-      {/* Header */}
+      {/* Header with back button */}
       <View style={styles.header}>
+        <Pressable onPress={() => router.back()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color={Colors.textPrimary} />
+        </Pressable>
         <Text style={styles.headerTitle}>Quest Details</Text>
+        <View style={{ width: 32 }} />
       </View>
 
       {/* Quest detail card */}
@@ -107,9 +101,9 @@ export default function QuestDetailScreen() {
 
       {/* Actions */}
       <Button
-        label="mark as Complete"
+        label={quest.completed ? "Completed" : "Mark as Complete"}
         onPress={handleMarkComplete}
-        variant="secondary"
+        variant="primary"
         disabled={quest.completed}
         style={styles.actionBtn}
       />
@@ -120,6 +114,7 @@ export default function QuestDetailScreen() {
         style={styles.actionBtn}
       />
     </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -136,11 +131,17 @@ const styles = StyleSheet.create({
     gap: Spacing.cardGap,
   },
   header: {
-    paddingTop: Spacing.xl,
-    paddingBottom: Spacing.lg,
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
+    paddingTop: Spacing.lg,
+    paddingBottom: Spacing.lg,
+    paddingHorizontal: Spacing.screen,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
+  },
+  backButton: {
+    padding: Spacing.xs,
   },
   headerTitle: {
     fontSize: Typography.xl,

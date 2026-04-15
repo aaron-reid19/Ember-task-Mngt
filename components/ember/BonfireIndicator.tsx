@@ -1,8 +1,3 @@
-// 🔵 DECISION — replaced Aaron's BonfireIndicator (full-screen overlay) with Kaley's version (amber card) [Apr 2026]
-// ? Aaron: your version was a full-screen overlay with position:absolute.
-//   Kaley's is a simpler amber rounded card shown inline in the scroll content.
-//   ⚪ DEFERRED — particle/confetti animation out of MVP scope.
-
 /**
  * Ember — BonfireIndicator
  * Layer: UI

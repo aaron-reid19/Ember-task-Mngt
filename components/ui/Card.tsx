@@ -1,6 +1,3 @@
-// 🔵 DECISION — replaced Aaron's Card with Kaley's version [Apr 2026]
-// ? Aaron: your version lacked `onPress` prop. Kaley's adds it for QuestCard navigation.
-
 /**
  * Ember — Card
  * Layer: UI

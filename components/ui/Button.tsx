@@ -1,7 +1,3 @@
-// 🔵 DECISION — replaced Aaron's Button with Kaley's version [Apr 2026]
-// ? Aaron: your version lacked `disabled`, `style`, `textStyle` props. Kaley's adds them.
-//   Also changed styling: pill shape (borderRadius 99), pressed opacity, disabled state.
-
 /**
  * Ember — Button
  * Layer: UI

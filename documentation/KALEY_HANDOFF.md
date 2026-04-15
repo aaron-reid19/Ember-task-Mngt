@@ -1,30 +1,104 @@
 # Kaley's UI Layer Handoff
 
 **Author:** Kaley Wood
-**Date:** 2026-04-07
+**Date:** 2026-04-13
 **Branch:** `branch-kaley`
 
 ---
 
 ## Summary
 
-The entire UI layer for Ember is complete. All screens, components, types, constants, and navigation are built and rendering with stub data. This document covers what was built, how it's organized, and what Josh and Aaron need to wire up their layers.
+The entire UI layer for Ember is complete. All screens, components, types, constants, and navigation are built and rendering with real Firestore data. Authentication (email/password), onboarding, and the HP system are fully wired end-to-end.
 
 ---
 
-## What Was Built
+## What's New Since Last Handoff (Apr 7 → Apr 13)
 
-### Screens (7 total)
+### Authentication System (New)
 
-| Screen | Route | User Story | Status |
-|--------|-------|------------|--------|
-| Home | `(tabs)/index.tsx` | U1, U2 | Complete w/ stub data |
-| Quest Board | `(tabs)/quests/index.tsx` | U4 | Complete w/ stub data |
-| Quest Detail | `(tabs)/quests/[id].tsx` | U5 | Complete w/ stub data |
-| Task List | `(tabs)/tasks/index.tsx` | U6 | Complete w/ stub data |
-| Task Edit | `(tabs)/tasks/[id].tsx` | U7 | Complete w/ stub data |
-| Profile | `(tabs)/profile.tsx` | U8 | Complete w/ stub data |
-| Onboarding | `(onboarding)/goal-setup.tsx` | U9 | Complete w/ stub data |
+Full email/password auth flow built from scratch:
+
+| File | What it does |
+|------|-------------|
+| `app/(auth)/login.tsx` | Login screen with email/password form, show/hide password toggle, demo account button |
+| `app/(auth)/signup.tsx` | Signup screen with first/last name, email, password + confirm, show/hide toggle |
+| `app/(auth)/_layout.tsx` | Auth stack layout (no header) |
+| `services/firebaseAuth.ts` | `signup()`, `login()`, `loginWithGoogle()`, `logout()`, `subscribeToAuth()` — all with user-friendly error messages |
+| `services/firebaseConfig.ts` | Firebase app initialization from env vars |
+| `store/authContext.tsx` | `AuthProvider` + `useAuth()` hook — wraps app, provides user state and auth methods |
+
+**Key details:**
+- Signup auto-falls back to login if email already exists (handles half-created accounts)
+- Firestore profile sync is best-effort — auth succeeds even if Firestore hiccups
+- Friendly error messages replace raw Firebase error codes (e.g. "An account with this email already exists. Try signing in instead.")
+- Demo account: `demo@ember.app` / `demo1234` — self-provisioning via "Skip — use demo account" button on login screen
+
+### HP Formula Change (Breaking)
+
+**Old formula:** `HP = (completed task count / dailyGoal) × 100`
+**New formula:** `HP = (sum of completed task hpCosts / sum of all task hpCosts) × 100`
+
+HP is now driven by per-task `hpCost` values. Adding a 30 HP task drops Ember's health more than adding a 5 HP task. Completing heavy tasks gives a bigger boost. No tasks on the board = 100 HP.
+
+See `documentation/JOSH_HP_HANDOFF.md` for the full migration details for Josh.
+
+### `dailyGoal` Removed
+
+`dailyGoal` was orphaned after the HP formula change (nothing consumed it). Fully stripped from:
+- Onboarding screen (no longer asks for a goal)
+- Profile screen (goal config card removed)
+- `useAppStore` (no longer tracks it)
+- `FirestoreServices` (no longer stored or accepted)
+- `UserProfileInput` type
+
+Existing Firestore documents may still have a `dailyGoal` field — it's harmless, just ignored.
+
+### Onboarding Simplified
+
+The onboarding screen is now a welcome page that explains the HP system and marks `onboardingComplete: true` in Firestore. No goal picker. Back button logs out and returns to login.
+
+### Routing & Navigation
+
+| Route | When |
+|-------|------|
+| `app/index.tsx` | Entry point — checks auth + onboarding, redirects accordingly |
+| Not signed in | → `/(auth)/login` |
+| Signed in, not onboarded | → `/(onboarding)/goal-setup` |
+| Signed in + onboarded | → `/(tabs)` |
+| Login/signup success | → `/` (index handles routing) |
+| Onboarding back button | → logout + `/(auth)/login` |
+
+### Firestore Profile
+
+`createUserProfile()` now initializes:
+- `currentHP: 100`
+- `emberState: "thriving"`
+- `bonfireActive: false`
+- `onboardingComplete: false`
+- `displayName`, `email`, `photoURL` from auth
+
+### Component Updates
+
+- `HPCostCalculator` — added optional `label` and `showBadge` props (defaults preserve existing behavior)
+- `Button` — unchanged, `primary` and `secondary` variants used across auth screens
+
+---
+
+## What Was Built (Complete List)
+
+### Screens (9 total)
+
+| Screen | Route | Status |
+|--------|-------|--------|
+| Home | `(tabs)/index.tsx` | Complete — real data via `useEmber()`, `useTasks()`, `useStreak()` |
+| Quest Board | `(tabs)/quests/index.tsx` | Complete — real data |
+| Quest Detail | `(tabs)/quests/[id].tsx` | Complete — real data |
+| Task List | `(tabs)/tasks/index.tsx` | Complete — real data |
+| Task Edit | `(tabs)/tasks/[id].tsx` | Complete — real data |
+| Profile | `(tabs)/profile.tsx` | Complete — real data, goal config removed |
+| Onboarding | `(onboarding)/goal-setup.tsx` | Complete — welcome screen, no goal picker |
+| Login | `(auth)/login.tsx` | **New** — email/password + demo login |
+| Signup | `(auth)/signup.tsx` | **New** — first/last name + email/password |
 
 ### Components (16 total)
 
@@ -37,13 +111,12 @@ The entire UI layer for Ember is complete. All screens, components, types, const
 
 **Ember** (`components/ember/`)
 - `EmberCreature.tsx` — Creature sprite with scale/opacity animations per HP state
-- `EmberAnimations.tsx` — Internal Reanimated animation logic
 - `DailySparkCard.tsx` — Spark task card with completion button
 - `BonfireIndicator.tsx` — Celebration overlay when HP=100 + Spark done
 
 **Tasks** (`components/tasks/`)
 - `TaskListItem.tsx` — Task row: checkbox, name, HP cost
-- `HPCostCalculator.tsx` — Stepper with +/- buttons, reused across screens
+- `HPCostCalculator.tsx` — Stepper with +/- buttons, optional label/badge
 
 **Quests** (`components/quests/`)
 - `QuestCard.tsx` — Quest row: checkbox, name, cadence badge, HP, status
@@ -54,17 +127,38 @@ The entire UI layer for Ember is complete. All screens, components, types, const
 - `StreakDisplay.tsx` — Current streak counter
 - `EvolutionLog.tsx` — Timeline of state changes
 
+### Services & Store
+
+| File | Purpose |
+|------|---------|
+| `services/firebaseConfig.ts` | Firebase app init from env vars |
+| `services/firebaseAuth.ts` | Auth functions with friendly errors |
+| `services/FirestoreServices.ts` | CRUD for profiles, tasks, quests, HP snapshots |
+| `store/authContext.tsx` | Auth state provider + `useAuth()` hook |
+| `store/useAppStore.ts` | Profile state: `onboardingComplete`, `currentHP`, `loading` |
+
+### Hooks (Logic Layer)
+
+| Hook | Returns | Used By |
+|------|---------|---------|
+| `useEmber()` | `{ hp, state, isBonfire }` | Home, Quest Board, Task List, Profile |
+| `useTasks()` | `Task[]` | Home, Task List, useEmber |
+| `useTask(id)` | `Task` | Task Edit |
+| `useQuests(cadence?)` | `Quest[]` | Quest Board |
+| `useQuest(id)` | `Quest` | Quest Detail |
+| `useDailySpark()` | `{ spark, onComplete }` | Home (DailySparkCard) |
+| `useStreak()` | `{ current }` | Home, Profile |
+| `useHPHistory()` | `{ snapshots }` | Profile (HPTrendChart) |
+
 ### Types (`types/`)
 
-All type contracts are locked in and exported from `types/index.ts`:
+All type contracts exported from `types/index.ts`:
 
 - **`ember.ts`** — `EmberState`, `HPData`, `HPSnapshot`
 - **`task.ts`** — `Task`, `TaskPriority`, `TaskTag`
 - **`quest.ts`** — `Quest`, `QuestCadence`, `WeekDay`
 
 ### Constants (`constants/`)
-
-All design tokens are centralized — no inline hex values or font sizes anywhere:
 
 - **`Colors.ts`** — Full dark purple palette from Figma
 - **`Typography.ts`** — Font sizes (xs–hero), weights, caps tracking
@@ -84,29 +178,38 @@ These are non-negotiable patterns the whole team agreed on:
 5. **`@/` alias for all imports** — No relative paths (`../../`).
 6. **StyleSheet at file bottom** — Always outside the component function.
 7. **Forms use React Hook Form + Zod** — Never plain `useState` for form state.
-8. **File headers on every file** — Block comment with owner, status, dependencies, notes. See `COMMENTING_CONVENTIONS.md`.
-9. **Status tags on stubs** — Every stub is marked with a comment tag so it's easy to find and replace.
+8. **File headers on every file** — Block comment with owner, status, dependencies, notes.
 
 ---
 
-## What Josh Needs to Build (Logic Layer)
+## HP System (Current)
 
-All screens are ready to consume hooks. Currently using hardcoded stub data where hooks will go.
+**Formula:** `HP = (sum of completed task hpCosts / sum of all task hpCosts) × 100`
 
-| Hook | Returns | Used By |
-|------|---------|---------|
-| `useEmber()` | `{ hp, state, isBonfire }` | Home, Quest Board, Task List, Profile |
-| `useTasks()` | `Task[]` | Home (today's progress), Task List |
-| `useTask(id)` | `Task` | Task Edit |
-| `useQuests(cadence?)` | `Quest[]` | Quest Board |
-| `useQuest(id)` | `Quest` | Quest Detail |
-| `useDailySpark()` | `{ task, onComplete }` | Home (DailySparkCard) |
-| `useStreak()` | `number` | Home, Profile |
-| `useHPHistory(range)` | `HPSnapshot[]` | Profile (HPTrendChart) |
+| Scenario | HP |
+|----------|-----|
+| No tasks | 100 (Ember is happy) |
+| All tasks completed | 100 (Bonfire eligible) |
+| Some tasks completed | Weighted ratio based on hpCost |
 
-**HP Formula:** `HP = (completedTasks / dailyGoal) * 100`, clamped 0–100.
+**State classification** (unchanged from original spec):
+- Thriving: 80–100 HP
+- Steady: 50–79 HP
+- Strained: 20–49 HP
+- Flickering: 0–19 HP
 
-**Bonfire Mode:** `isBonfire = true` only when HP === 100 AND Daily Spark is complete.
+**Bonfire Mode:** `hp === 100 AND isDailySparkComplete`
+
+---
+
+## What Josh Needs to Know
+
+See `documentation/JOSH_HP_HANDOFF.md` for the full breakdown. Key points:
+
+- `calculateHP()` signature changed: `(completedHP, totalHP)` instead of `(completedTasks, dailyGoal)`
+- `calculateTaskHP()` removed (no imports existed)
+- `classifyHP()` and `checkBonfire()` untouched
+- `useEmber()` return shape unchanged — all consumers work as-is
 
 ---
 
@@ -114,34 +217,33 @@ All screens are ready to consume hooks. Currently using hardcoded stub data wher
 
 | Service/Store | Purpose |
 |---------------|---------|
-| `AsyncStorageService` | Local persistence: HP, daily goal, onboarding flag |
-| `FirestoreService` | CRUD for tasks, quests, HP snapshots |
 | `NotificationService` | Schedule reminders, handle permission checks |
-| `useAppStore()` | Global state: daily goal, current HP (consumed by hooks) |
+| D9: HP snapshot writes | Daily HP snapshot to Firestore for trend chart |
+| D12: Notification permission | Permission check for `NotificationBanner` in root layout |
 
 ---
 
-## Known Issues & QA Fixes
+## Known Issues & QA Status
 
-Five items flagged in `QA_FIXES_HANDOFF.md` that still need attention:
+Last full QA pass: Apr 13, 2026.
 
-1. **Raw hex values** — 3 files still have ~5 inline hex values that should reference `Colors.ts`
-2. **Form wiring** — 3 screens need React Hook Form + Zod validation connected
-3. **Route typing** — 7 `as any` casts on `router.push()` calls need typed routes
-4. **HPBar color** — Should read from `EmberStates.ts` canonical source, not local logic
-5. **TODO comment** — One `// TODO` should be `// DEFERRED` per commenting conventions
+- Auth flow: validated — Zod/Firebase aligned, navigation correct, error handling complete
+- HP formula: validated — zero `dailyGoal` references remaining, all edge cases handled
+- `loginWithGoogle()` exported but no UI button — incomplete feature, not a regression
+- Ember sprite images in `assets/images/` are 0-byte placeholders — real assets needed
 
 ---
 
-## Existing Documentation
+## Documentation
 
 | File | What It Covers |
 |------|----------------|
+| `JOSH_HP_HANDOFF.md` | HP formula change details for Josh |
 | `COMMENTING_CONVENTIONS.md` | Status tags, inline tags, file header template |
 | `EMBER_BEST_PRACTICES.md` | Layer rules, patterns, naming |
 | `Ember_Kaley_QA.md` | 100-item QA checklist across all UI work |
 | `EMBER_EXPO_GO_QA.md` | Compiler checks, render testing, common errors |
-| `QA_FIXES_HANDOFF.md` | 5 high-priority fixes (details above) |
+| `QA_FIXES_HANDOFF.md` | 5 high-priority fixes from earlier QA |
 
 ---
 
@@ -153,19 +255,4 @@ npx expo start
 # Scan QR with Expo Go on your device
 ```
 
----
-
-## Asset Note
-
-The ember sprite images in `assets/images/` (ember-thriving.png, ember-steady.png, ember-strained.png, ember-flickering.png) are **0-byte placeholders**. Real assets need to be dropped in before final QA. The `EmberCreature` component will pick them up automatically by state name.
-
----
-
-## Next Milestone
-
-Once Josh's hooks and Aaron's services land, I'll:
-1. Swap all stub data for real hook calls
-2. Run the full `EMBER_EXPO_GO_QA.md` checklist
-3. Fix any remaining items from `Ember_Kaley_QA.md`
-4. Polish navigation (tab persistence, deep links)
-5. Final screen-by-screen render test on device
+Requires `.env` file with Firebase config (see `services/firebaseConfig.ts` for required keys).

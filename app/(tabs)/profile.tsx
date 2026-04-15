@@ -1,16 +1,9 @@
-// 🔵 DECISION — replaced Aaron's Profile scaffold with Kaley's full Figma implementation [Apr 2026]
-// ? Aaron: Kaley's version adds avatar/identity card, 2×2 stats grid, HP hero number, goal config stepper.
-//   Your version used StreakDisplay, HPTrendChart, EvolutionLog components directly.
-//   Kaley's inlines the profile layout and uses HPCostCalculator for goal stepper.
-//   Aaron's profile components (StreakDisplay, HPTrendChart, EvolutionLog) are still in components/profile/
-//   but are not imported by this screen — they can be re-integrated in Wave 3 if needed.
-
 /**
  * Ember — Profile Screen
  * Layer: UI
  * Owner: Kaley
  * Task IDs: U8
- * Status: 🟡 STUB
+ * Status: 🟢 READY
  *
  * Dependencies:
  *   - L1, L2: useEmber() for hp, state — Josh — PENDING
@@ -39,55 +32,46 @@ import {
   Text,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { HPBar } from "@/components/ui/HPBar";
-import { HPCostCalculator } from "@/components/tasks/HPCostCalculator";
+import { HPTrendChart } from "@/components/profile/HPTrendChart";
+import { EvolutionLog } from "@/components/profile/EvolutionLog";
 import Colors from "@/constants/Colors";
 import { Typography } from "@/constants/Typography";
 import { Spacing } from "@/constants/Spacing";
-import { EmberState, EmberStates } from "@/constants/EmberStates";
-
-// ~ ─────────────────────────────────────────────────────────────────
-// ~ STUB DATA
-// ~ ─────────────────────────────────────────────────────────────────
-
-// 🟡 STUB [L1, L2] — replace with useEmber() when Josh's hooks are done
-const hp = 87;
-const state: EmberState = "Thriving";
-
-// 🟡 STUB [L6] — replace with useStreak() when Josh's hook is done
-const streak = 7;
-
-// 🟡 STUB [D7, D8, D9] — replace with real data from Aaron's services via Josh's hooks
-const totalTasksDone = 42;
-const questsCompleted = 12;
-const daysTracked = 23;
-
-// 🟡 STUB — replace with real user profile data when available
-const userName = "Joshua Couto";
-const userInitials = "JC";
-const dailyGoal = 10;
-
-// ~ ─────────────────────────────────────────────────────────────────
+import { EmberStates } from "@/constants/EmberStates";
+import { useEmber } from "@/hooks/useEmber";
+import { useStreak } from "@/hooks/useStreak";
+import { useHPHistory } from "@/hooks/useHPHistory";
+import { useTasks } from "@/hooks/useTasks";
+import { useQuests } from "@/hooks/useQuests";
+import { useAuth } from "@/store/authContext";
 
 export default function ProfileScreen() {
-  // ← JOSH: replace stubs above with:
-  // const { hp, state } = useEmber();
-  // const streak = useStreak();
-  // const history = useHPHistory("weekly"); // or "monthly" based on toggle
-  // ← AARON: totalTasksDone, questsCompleted, daysTracked come from Firestore aggregates
+  const { hp, state } = useEmber();
+  const { current: streak } = useStreak();
+  const { snapshots } = useHPHistory();
+  const { tasks } = useTasks();
+  const { quests } = useQuests();
+  const { user } = useAuth();
 
-  function handleGoalChange(newGoal: number) {
-    // 🔴 BLOCKED [D3, D6] — waiting on Aaron's AsyncStorage + Firestore sync
-    // Unblock: useAppStore.setDailyGoal() or equivalent must exist
-    // ! HP formula denominator changes when this updates — Josh's L1 must re-run
-    console.log("🟡 STUB: daily goal changed to", newGoal);
-  }
+  const totalTasksDone = tasks.filter((t) => t.completed).length;
+  const questsCompleted = quests.filter((q) => q.completed).length;
+  const daysTracked = snapshots.length;
+
+  const userName = user?.displayName ?? "Explorer";
+  const userInitials = userName
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 
   const stateColor = EmberStates[state].color;
 
   return (
+    <SafeAreaView style={styles.screen} edges={["top"]}>
     <ScrollView
-      style={styles.screen}
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
     >
@@ -140,34 +124,16 @@ export default function ProfileScreen() {
 
       {/* ~ ── HP Trend chart ─────────────────────────────────────── */}
       <View style={styles.card}>
-        {/* 🟡 STUB — replace with <HPTrendChart history={history} /> when D9 + Josh's hook ready */}
-        {/* ^ HPTrendChart handles its own weekly/monthly toggle internally */}
-        <View style={styles.chartStub}>
-          <Text style={styles.chartStubLabel}>HP Trend</Text>
-          <Text style={styles.chartStubSub}>
-            🟡 STUB — HPTrendChart renders here{"\n"}
-            Needs: useHPHistory() from Josh + D9 from Aaron
-          </Text>
-        </View>
+        <HPTrendChart snapshots={snapshots} />
       </View>
 
-      {/* ~ ── Goal config ─────────────────────────────────────────── */}
+      {/* ~ ── Evolution Log ──────────────────────────────────────── */}
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Goal config</Text>
-        <View style={styles.goalRow}>
-          <View>
-            <Text style={styles.goalLabel}>Daily task goal</Text>
-            <Text style={styles.goalSub}>Sets your HP denominator</Text>
-          </View>
-          <HPCostCalculator
-            initialValue={dailyGoal}
-            onCostChange={handleGoalChange}
-            min={1}
-            max={30}
-          />
-        </View>
+        <EvolutionLog snapshots={snapshots} />
       </View>
+
     </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -290,38 +256,5 @@ const styles = StyleSheet.create({
     fontWeight: Typography.bold,
     color: Colors.textPrimary,
     marginBottom: Spacing.md,
-  },
-  // ~ HP Trend stub
-  chartStub: {
-    height: 160,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: Spacing.sm,
-  },
-  chartStubLabel: {
-    fontSize: Typography.lg,
-    fontWeight: Typography.bold,
-    color: Colors.textPrimary,
-  },
-  chartStubSub: {
-    fontSize: Typography.sm,
-    color: Colors.textMuted,
-    textAlign: "center",
-  },
-  // ~ Goal config
-  goalRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  goalLabel: {
-    fontSize: Typography.md,
-    fontWeight: Typography.semiBold,
-    color: Colors.textPrimary,
-  },
-  goalSub: {
-    fontSize: Typography.sm,
-    color: Colors.textSecondary,
-    marginTop: 2,
   },
 });

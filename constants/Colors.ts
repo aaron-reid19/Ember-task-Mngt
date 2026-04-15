@@ -1,8 +1,3 @@
-// 🔵 DECISION — replaced Aaron's Colors.ts (navy/slate palette) with Kaley's Figma-derived version (dark purple/amber) [Apr 2026]
-// ? Aaron: your scaffold used different property names (screenBackground → bgDeep, cardBackground → bgCard, etc.)
-//   and a different color palette. All your files that imported Colors will need property name updates.
-//   Kaley's hex values came directly from Figma and must not be changed.
-
 /**
  * Ember — Colors
  * Layer: UI

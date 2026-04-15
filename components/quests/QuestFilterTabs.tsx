@@ -1,8 +1,3 @@
-// 🔵 DECISION — replaced Aaron's QuestFilterTabs (controlled) with Kaley's version (uncontrolled) [Apr 2026]
-// ? Aaron: your version was controlled (selected + onFilterChange props, lowercase cadences).
-//   Kaley's manages its own selected state internally, fires onSelect(cadence) with Capitalized values.
-//   Also uses Kaley's Figma-derived styling (pill tabs with border, not filled orange).
-
 /**
  * Ember — QuestFilterTabs
  * Layer: UI
