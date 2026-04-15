@@ -23,6 +23,7 @@
 
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import Colors from "@/constants/Colors";
@@ -48,8 +49,7 @@ export function DailySparkCard({ task, onComplete }: DailySparkCardProps) {
       <View style={styles.row}>
         {/* Left: icon + text stack */}
         <View style={styles.iconWrap}>
-          {/* 🟡 STUB — replace with actual spark icon asset */}
-          <View style={styles.sparkIconPlaceholder} />
+          <Ionicons name="flame" size={32} color={Colors.accent} />
         </View>
 
         <View style={styles.textBlock}>
@@ -86,14 +86,6 @@ const styles = StyleSheet.create({
     height: 48,
     alignItems: "center",
     justifyContent: "center",
-  },
-  // 🟡 STUB — remove when spark icon asset is added
-  sparkIconPlaceholder: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: Colors.accent,
-    opacity: 0.4,
   },
   textBlock: {
     flex: 1,

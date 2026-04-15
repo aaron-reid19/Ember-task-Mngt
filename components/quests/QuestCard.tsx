@@ -23,6 +23,7 @@
 
 import React from "react";
 import { StyleSheet, Text, View, Pressable } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import Colors from "@/constants/Colors";
@@ -56,7 +57,9 @@ export function QuestCard({ quest, onPress, onToggle }: QuestCardProps) {
           <Text style={[styles.name, quest.completed && styles.nameStruck]}>
             {quest.name}
           </Text>
-          <Text style={styles.status}>Status: {quest.status}</Text>
+          {quest.status === 'complete' && (
+            <Text style={styles.status}>Status: complete</Text>
+          )}
           <Badge label={quest.cadence} style={styles.badge} />
         </View>
 
@@ -67,8 +70,7 @@ export function QuestCard({ quest, onPress, onToggle }: QuestCardProps) {
           </Text>
           {/* Spark icon — only show if this quest is the Daily Spark */}
           {quest.isDailySpark && (
-            // 🟡 STUB — replace with actual spark icon asset
-            <View style={styles.sparkIconPlaceholder} />
+            <Ionicons name="flame" size={28} color={Colors.accent} />
           )}
         </View>
       </View>
@@ -136,13 +138,5 @@ const styles = StyleSheet.create({
   },
   ptsCompleted: {
     color: Colors.accent,
-  },
-  // 🟡 STUB — remove when spark icon asset added
-  sparkIconPlaceholder: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: Colors.accent,
-    opacity: 0.5,
   },
 });

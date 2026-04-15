@@ -55,7 +55,7 @@ export default function TaskListScreen() {
         <Pressable onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={Colors.textPrimary} />
         </Pressable>
-        <Text style={styles.screenTitle}>Tasks</Text>
+        <Text style={styles.screenTitle}>Quests</Text>
         <View style={{ width: 32 }} />
       </View>
 
@@ -103,6 +103,7 @@ const styles = StyleSheet.create({
   },
   hpBarSection: {
     paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing.screen,
   },
   taskList: {
     paddingHorizontal: Spacing.screen,

@@ -8,8 +8,6 @@ import { doc,
     getDoc,
     getDocs } from "firebase/firestore";
 import { db } from "./firebaseConfig";
-// ! duplicate db import removed — was: import { db } from "@/firebase/config";
-// ← AARON: verify "./firebaseConfig" is the correct path
 import type { LocalEmberData } from "@/types/ember";
 import type { EmberState, TaskPriority, QuestCadence } from "@/types";
 
@@ -301,7 +299,7 @@ export async function saveDailyHPSnapshot(
     data: LocalEmberData
   ): Promise<void> {
     const dateKey = new Date().toISOString().split("T")[0];
-    const snapshotRef = doc(db, "users", userId, "hpHistory", dateKey);
+    const snapshotRef = doc(db, "users", userId, "hpSnapshots", dateKey);
   
     await setDoc(
       snapshotRef,

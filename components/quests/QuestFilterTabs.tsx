@@ -29,7 +29,7 @@ import { QuestCadence, CADENCE_LABELS } from "@/types";
 
 // * Figma shows these five tabs on Quest Board
 // * "Biweekly" appears in Add Quest form but not Quest Board filter — matches spec
-const CADENCE_TABS: QuestCadence[] = ["today", "daily", "weekly", "monthly", "custom"];
+const CADENCE_TABS: QuestCadence[] = ["all", "daily", "weekly", "monthly"];
 
 export interface QuestFilterTabsProps {
   onSelect: (cadence: QuestCadence) => void;
@@ -40,7 +40,7 @@ export interface QuestFilterTabsProps {
 
 export function QuestFilterTabs({
   onSelect,
-  initialSelected = "daily",
+  initialSelected = "all",
 }: QuestFilterTabsProps) {
   // * Local state — selected tab is purely interaction state, not business logic
   const [selected, setSelected] = useState<QuestCadence>(initialSelected);

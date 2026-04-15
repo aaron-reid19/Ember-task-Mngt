@@ -12,10 +12,11 @@
  *   Josh's useQuests(cadence) hook filters by QuestCadence.
  */
 
-export type QuestCadence = "today" | "daily" | "weekly" | "biweekly" | "monthly" | "custom";
+export type QuestCadence = "all" | "today" | "daily" | "weekly" | "biweekly" | "monthly" | "custom";
 
 // * Display labels for UI — maps Firestore values to human-readable text
 export const CADENCE_LABELS: Record<QuestCadence, string> = {
+  all: "All",
   today: "Once",
   daily: "Daily",
   weekly: "Weekly",

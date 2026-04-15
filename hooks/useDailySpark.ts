@@ -18,8 +18,10 @@ import { Task } from "@/types";
 import { useTasks } from "./useTasks";
 import { selectDailySpark } from "@/utils/sparkEngine";
 
-export function useDailySpark(): { spark: Task | null; loading: boolean } {
-  const { tasks, loading } = useTasks();
+export function useDailySpark(externalTasks?: Task[]): { spark: Task | null; loading: boolean } {
+  const { tasks: internalTasks, loading: internalLoading } = useTasks();
+  const tasks = externalTasks ?? internalTasks;
+  const loading = externalTasks ? false : internalLoading;
 
   if (loading) {
     return { spark: null, loading: true };

@@ -83,8 +83,7 @@ export default function QuestDetailScreen() {
         {/* Spark badge — only shown if isDailySpark */}
         {quest.isDailySpark && (
           <View style={styles.sparkRow}>
-            {/* 🟡 STUB — replace with spark icon asset */}
-            <View style={styles.sparkIconPlaceholder} />
+            <Ionicons name="flame" size={28} color={Colors.accent} />
             <Text style={styles.sparkLabel}>DAILY SPARK</Text>
           </View>
         )}
@@ -163,14 +162,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: Spacing.sm,
-  },
-  // 🟡 STUB — remove when spark icon asset is added
-  sparkIconPlaceholder: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: Colors.accent,
-    opacity: 0.5,
   },
   sparkLabel: {
     fontSize: Typography.sm,

@@ -14,7 +14,7 @@
  *  - streakEngine.calculateStreak for streak calculation
  */
 
-import { calculateStreak } from "@/utils/streakEngine";
+import { calculateStreak, calculateLongestStreak } from "@/utils/streakEngine";
 import { useHPHistory } from "./useHPHistory";
 
 type StreakData = {
@@ -31,17 +31,7 @@ export function useStreak(): StreakData {
   }
 
   const current = calculateStreak(snapshots);
-
-  // Calculate longest by checking all possible starting positions
-  let longest = current;
-  for (let start = 1; start < snapshots.length; start++) {
-    let streak = 0;
-    for (let i = start; i < snapshots.length; i++) {
-      if (snapshots[i].hp === 0) break;
-      streak++;
-    }
-    if (streak > longest) longest = streak;
-  }
+  const longest = calculateLongestStreak(snapshots);
 
   return { current, longest, loading: false };
 }

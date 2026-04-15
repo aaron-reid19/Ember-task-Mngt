@@ -99,13 +99,13 @@ export default function TaskEditScreen() {
           <Pressable onPress={() => router.back()} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color={Colors.textPrimary} />
           </Pressable>
-          <Text style={styles.screenTitle}>Edit Task</Text>
+          <Text style={styles.screenTitle}>Edit Quest</Text>
           <View style={{ width: 32 }} />
         </View>
 
         <Card>
           {/* Task name input */}
-          <Text style={styles.fieldLabel}>Task Name</Text>
+          <Text style={styles.fieldLabel}>Quest Name</Text>
           <Controller
             control={control}
             name="name"

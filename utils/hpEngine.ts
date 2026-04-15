@@ -49,7 +49,7 @@ export function classifyHP( hp: number ): EmberState {
 
 /** Checks if HP === 100 and if Daily Spark has been completed, then returns a boolean */
 export function checkBonfire( hp: number, isDailySparkComplete: boolean ): boolean {
-  return hp === BONFIRE_HP_THRESHOLD && isDailySparkComplete;
+  return hp >= BONFIRE_HP_THRESHOLD && isDailySparkComplete;
 }
 
 /** Calculates HP received for completing a single task */

@@ -33,11 +33,13 @@ import {
   Pressable,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { HPCostCalculator } from "@/components/tasks/HPCostCalculator";
+import { CalendarPicker } from "@/components/ui/CalendarPicker";
 import { Button } from "@/components/ui/Button";
 import Colors from "@/constants/Colors";
 import { Typography } from "@/constants/Typography";
@@ -80,7 +82,7 @@ export default function AddQuestScreen() {
   const { create: createQuest } = useQuests();
 
   // * All form state managed by React Hook Form + Zod
-  const { control, handleSubmit, formState: { errors }, setValue, watch } = useForm<QuestFormData>({
+  const { control, handleSubmit, formState: { errors }, setValue, watch, reset } = useForm<QuestFormData>({
     resolver: zodResolver(questSchema),
     defaultValues: {
       name: "",
@@ -96,6 +98,7 @@ export default function AddQuestScreen() {
   const activeDays = watch("activeDays");
   const startDate = watch("startDate");
   const [showCalendar, setShowCalendar] = React.useState(false);
+  const [showDatePicker, setShowDatePicker] = React.useState(false);
 
   // ~ ───────────────────────────────────────────────────────────────
 
@@ -116,10 +119,16 @@ export default function AddQuestScreen() {
       cadence: data.frequency,
       recurrenceRule: data.activeDays.length > 0 ? data.activeDays.join(",") : null,
     });
+    reset();
+    setShowCalendar(false);
+    setShowDatePicker(false);
     router.back();
   }
 
   function handleDiscard() {
+    reset();
+    setShowCalendar(false);
+    setShowDatePicker(false);
     router.back();
   }
 
@@ -201,8 +210,11 @@ export default function AddQuestScreen() {
             onPress={() => setShowCalendar(!showCalendar)}
             style={styles.iconButton}
           >
-            {/* 🟡 STUB — replace with calendar icon asset */}
-            <View style={styles.iconPlaceholder} />
+            <Ionicons
+              name="calendar-outline"
+              size={24}
+              color={showCalendar ? Colors.accent : Colors.textSecondary}
+            />
           </Pressable>
         </View>
 
@@ -259,15 +271,28 @@ export default function AddQuestScreen() {
               {startDate ?? "Today?"}
             </Text>
           </View>
-          {/* Calendar icon — tapping would open date picker */}
-          <Pressable style={styles.iconButton}>
-            {/* 🟡 STUB — replace with calendar icon + DateTimePicker */}
-            {/* ⚪ DEFERRED — full date picker integration
-                Reason: MVP uses "Today" as default per Figma
-                Unblock: add @react-native-community/datetimepicker when ready */}
-            <View style={[styles.iconPlaceholder, styles.iconPlaceholderActive]} />
+          {/* Calendar icon — tapping opens date picker */}
+          <Pressable
+            onPress={() => setShowDatePicker(!showDatePicker)}
+            style={styles.iconButton}
+          >
+            <Ionicons
+              name="calendar-outline"
+              size={24}
+              color={showDatePicker ? Colors.accent : Colors.textSecondary}
+            />
           </Pressable>
         </View>
+
+        {/* Calendar date picker — visible when icon is tapped */}
+        {showDatePicker && (
+          <CalendarPicker
+            selected={startDate ?? null}
+            onSelect={(date) => {
+              setValue("startDate", date);
+            }}
+          />
+        )}
       </View>
 
       {/* ~ ── Action buttons ─────────────────────────────────────── */}
@@ -346,17 +371,6 @@ const styles = StyleSheet.create({
   },
   iconButton: {
     padding: Spacing.xs,
-  },
-  // 🟡 STUB — remove when icon assets are added
-  iconPlaceholder: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: Colors.border,
-  },
-  iconPlaceholderActive: {
-    borderColor: Colors.accent,
   },
   // ~ Day selector
   dayRow: {
