@@ -21,6 +21,11 @@
  *      ← AARON: D12 must provide a function to check notification permission status.
  *      When D12 lands, call it in a useEffect on mount and set the banner state from the result.
  *   2. Font loading (if custom fonts are added) would go here via expo-font's useFonts().
+ *
+ * 🔵 DECISION — Aaron's branch also had setupNotificationChannels() call here.
+ *   When D12 is wired up, add:
+ *     import { setupNotificationChannels } from "@/services/NotificationService";
+ *     useEffect(() => { setupNotificationChannels(); }, []);
  */
 
 import { useState } from "react";
@@ -63,21 +68,4 @@ export default function RootLayout() {
       </SafeAreaProvider>
     </AuthProvider>
   );
-import { AuthProvider } from "@/context/authContext";
-import { setupNotificationChannels } from "@/services/NotificationService";
-import { useEffect } from "react";
-
-
-export default function RootLayout() {
-  useEffect(() => {
-    setupNotificationChannels();
-  }, [])
-  return (
-
-    <AuthProvider>
-    <Stack />
-  </AuthProvider>
-  
-  )
-  
 }

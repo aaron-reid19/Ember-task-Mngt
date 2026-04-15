@@ -12,8 +12,7 @@
  *   ! Do not hardcode these thresholds anywhere else in the codebase.
  */
 
-// * Four states observed in Figma — bonfire is a mode, not a state
-export type EmberState = "Thriving" | "Steady" | "Strained" | "Flickering";
+import type { EmberState } from "@/types";
 
 export const EmberStates: Record<
   EmberState,

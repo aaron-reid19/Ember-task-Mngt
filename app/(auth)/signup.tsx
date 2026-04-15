@@ -4,7 +4,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
+  Pressable,
   View,
   KeyboardAvoidingView,
   Platform,
@@ -173,7 +173,7 @@ export default function SignupScreen() {
                     autoComplete="password"
                     returnKeyType="next"
                   />
-                  <TouchableOpacity
+                  <Pressable
                     onPress={() => setShowPassword((prev) => !prev)}
                     hitSlop={8}
                   >
@@ -182,7 +182,7 @@ export default function SignupScreen() {
                       size={20}
                       color={Colors.textMuted}
                     />
-                  </TouchableOpacity>
+                  </Pressable>
                 </View>
               )}
             />
@@ -208,7 +208,7 @@ export default function SignupScreen() {
                     autoComplete="password"
                     returnKeyType="done"
                   />
-                  <TouchableOpacity
+                  <Pressable
                     onPress={() => setShowPassword((prev) => !prev)}
                     hitSlop={8}
                   >
@@ -217,7 +217,7 @@ export default function SignupScreen() {
                       size={20}
                       color={Colors.textMuted}
                     />
-                  </TouchableOpacity>
+                  </Pressable>
                 </View>
               )}
             />

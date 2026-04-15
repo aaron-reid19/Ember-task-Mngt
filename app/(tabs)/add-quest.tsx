@@ -6,7 +6,7 @@
  * Status: 🟡 STUB
  *
  * Dependencies:
- *   - D8: FirestoreService.createQuest() — Aaron — PENDING
+ *   - D8: useQuests().create() for persisting new quests — Aaron — 🟢 READY
  *   - L3: HP deduction on quest creation — Josh — PENDING
  *
  * Notes:
@@ -42,16 +42,16 @@ import { Button } from "@/components/ui/Button";
 import Colors from "@/constants/Colors";
 import { Typography } from "@/constants/Typography";
 import { Spacing } from "@/constants/Spacing";
-import { QuestCadence, WeekDay } from "@/types";
+import { QuestCadence, WeekDay, CADENCE_LABELS } from "@/types";
 import { useAuth } from "@/store/authContext";
-import { createQuest } from "@/services/FirestoreServices";
+import { useQuests } from "@/hooks/useQuests";
 
 // Zod schema — validation rules for the add quest form
 const questSchema = z.object({
   name: z.string().trim().min(1, "Quest name is required."),
   description: z.string().optional(),
   hpCost: z.number().min(1).max(50),
-  frequency: z.enum(["Daily", "Weekly", "Biweekly", "Monthly"]),
+  frequency: z.enum(["daily", "weekly", "biweekly", "monthly"]),
   activeDays: z.array(z.enum(["M", "T", "W", "Th", "F", "S", "Su"])),
   startDate: z.string().nullable().optional(),
 });
@@ -60,7 +60,7 @@ type QuestFormData = z.infer<typeof questSchema>;
 // ~ ─────────────────────────────────────────────────────────────────
 
 // * Frequency options seen in Figma (pill tabs inside frequency section)
-const FREQUENCY_OPTIONS = ["Daily", "Weekly", "Biweekly", "Monthly"] as const;
+const FREQUENCY_OPTIONS = ["daily", "weekly", "biweekly", "monthly"] as const;
 
 // * Day selector — M T W T F S S
 const DAYS: { label: string; value: WeekDay }[] = [
@@ -77,6 +77,7 @@ const DAYS: { label: string; value: WeekDay }[] = [
 
 export default function AddQuestScreen() {
   const { user } = useAuth();
+  const { create: createQuest } = useQuests();
 
   // * All form state managed by React Hook Form + Zod
   const { control, handleSubmit, formState: { errors }, setValue, watch } = useForm<QuestFormData>({
@@ -85,7 +86,7 @@ export default function AddQuestScreen() {
       name: "",
       description: "",
       hpCost: 10,
-      frequency: "Weekly",
+      frequency: "weekly",
       activeDays: [],
       startDate: null,
     },
@@ -108,11 +109,11 @@ export default function AddQuestScreen() {
 
   async function onSubmit(data: QuestFormData) {
     if (!user) return;
-    await createQuest(user.uid, {
+    await createQuest({
       title: data.name,
       description: data.description ?? "",
       hpReward: data.hpCost,
-      cadence: data.frequency.toLowerCase() as any,
+      cadence: data.frequency,
       recurrenceRule: data.activeDays.length > 0 ? data.activeDays.join(",") : null,
     });
     router.back();
@@ -193,7 +194,7 @@ export default function AddQuestScreen() {
         <View style={styles.sectionHeaderRow}>
           <View>
             <Text style={styles.fieldLabel}>FREQUENCY</Text>
-            <Text style={styles.sectionValue}>{frequency}</Text>
+            <Text style={styles.sectionValue}>{CADENCE_LABELS[frequency as QuestCadence] ?? frequency}</Text>
           </View>
           {/* Calendar icon — tapping expands frequency options */}
           <Pressable
@@ -241,7 +242,7 @@ export default function AddQuestScreen() {
                     frequency === option && styles.frequencyPillLabelSelected,
                   ]}
                 >
-                  {option}
+                  {CADENCE_LABELS[option as QuestCadence] ?? option}
                 </Text>
               </Pressable>
             ))}

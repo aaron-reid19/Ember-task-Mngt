@@ -47,12 +47,11 @@ import { useDailySpark } from "@/hooks/useDailySpark";
 import { useTasks } from "@/hooks/useTasks";
 import { useAuth } from "@/store/authContext";
 import { useStreak } from "@/hooks/useStreak";
-import { updateTask } from "@/services/FirestoreServices";
 
 export default function HomeScreen() {
   const { hp, state, isBonfire } = useEmber();
   const { spark: sparkTask } = useDailySpark();
-  const { tasks, refresh: refreshTasks } = useTasks();
+  const { tasks, update: updateTask, toggle: toggleTask } = useTasks();
   const { user } = useAuth();
   const { current: streakDays } = useStreak();
 
@@ -69,23 +68,18 @@ export default function HomeScreen() {
         hpCost: sparkTask.hpCost,
         completed: sparkTask.completed,
         isDailySpark: true,
-        cadence: "Daily" as const,
+        cadence: "daily" as const,
         status: (sparkTask.completed ? "complete" : "in progress") as "complete" | "in progress",
       }
     : null;
 
   async function handleSparkComplete() {
-    if (!user || !sparkTask) return;
-    await updateTask(user.uid, sparkTask.id, { completed: true });
-    refreshTasks();
+    if (!sparkTask) return;
+    await updateTask(sparkTask.id, { completed: true });
   }
 
   async function handleTaskToggle(taskId: string) {
-    if (!user) return;
-    const task = tasks.find((t) => t.id === taskId);
-    if (!task) return;
-    await updateTask(user.uid, taskId, { completed: !task.completed });
-    refreshTasks();
+    await toggleTask(taskId);
   }
 
   return (

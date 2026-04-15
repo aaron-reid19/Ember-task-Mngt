@@ -12,10 +12,14 @@
  *   so the user cannot press back to return to onboarding.
  *
  *   No tab bar is visible — (onboarding) has its own layout separate from (tabs).
+ *
+ *   🔵 DECISION — No RHF+Zod on this screen: no user-editable fields.
+ *   The dailyGoal stepper was moved to the Profile screen (U8).
+ *   QA_FIXES_HANDOFF Fix 2 Step 3 no longer applies here.
  */
 
 import { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -24,19 +28,17 @@ import Colors from "@/constants/Colors";
 import { Spacing } from "@/constants/Spacing";
 import { Typography } from "@/constants/Typography";
 import { useAuth } from "@/store/authContext";
-import { updateUserProfile } from "@/services/FirestoreServices";
-import { logout } from "@/services/firebaseAuth";
+import { useProfile } from "@/hooks/useProfile";
 
 export default function GoalSetupScreen() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { logout } = useAuth();
+  const { completeOnboarding } = useProfile();
   const [submitting, setSubmitting] = useState(false);
 
   async function onContinue() {
     setSubmitting(true);
-    if (user) {
-      await updateUserProfile(user.uid, { onboardingComplete: true });
-    }
+    await completeOnboarding();
     router.replace("/(tabs)");
   }
 
@@ -47,9 +49,9 @@ export default function GoalSetupScreen() {
 
   return (
     <SafeAreaView style={styles.screenContainer}>
-      <TouchableOpacity style={styles.backButton} onPress={onBack}>
+      <Pressable style={styles.backButton} onPress={onBack}>
         <Ionicons name="arrow-back" size={24} color={Colors.textPrimary} />
-      </TouchableOpacity>
+      </Pressable>
 
       <View style={styles.centeredContent}>
         <Text style={styles.welcomeTitle}>Welcome to Ember</Text>

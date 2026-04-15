@@ -1,12 +1,3 @@
-//   - QuestCadence values are now Capitalized ("Once"|"Daily"|...) not lowercase ("today"|"daily"|...)
-//   - Renamed hpReward → hpCost (Kaley's screens and components reference hpCost)
-//   - Quest changed from type to interface
-//   - Added isDailySpark, status, activeDays, startDate fields
-//   - Added WeekDay type for day selector in Add Quest form
-//   - Removed completedAt field (can be re-added if Firestore schema needs it)
-//   ! QuestCadence capitalization change affects Josh's useQuests(cadence) filter logic
-//   Resolve with team before Wave 3 integration.
-
 /**
  * Ember — quest.ts types
  * Layer: UI
@@ -15,13 +6,23 @@
  * Status: 🟢 READY
  *
  * Notes:
- *   QuestCadence values match the filter tabs shown in Figma Quest Board:
- *   Once / Daily / Weekly / Monthly / Custom
+ *   QuestCadence values are lowercase to match Firestore storage.
+ *   UI display labels are provided by CADENCE_LABELS.
  *   Aaron's Firestore schema (D8) must match this shape.
  *   Josh's useQuests(cadence) hook filters by QuestCadence.
  */
 
-export type QuestCadence = "Once" | "Daily" | "Weekly" | "Biweekly" | "Monthly" | "Custom";
+export type QuestCadence = "today" | "daily" | "weekly" | "biweekly" | "monthly" | "custom";
+
+// * Display labels for UI — maps Firestore values to human-readable text
+export const CADENCE_LABELS: Record<QuestCadence, string> = {
+  today: "Once",
+  daily: "Daily",
+  weekly: "Weekly",
+  biweekly: "Biweekly",
+  monthly: "Monthly",
+  custom: "Custom",
+};
 
 // * Days of the week for weekly recurrence — matches M T W T F S S day selector in Figma
 export type WeekDay = "M" | "T" | "W" | "Th" | "F" | "S" | "Su";

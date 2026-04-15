@@ -15,9 +15,8 @@ npx expo start
 
 Press `a` for Android emulator, or scan the QR code with Expo Go.
 
-<<<<<<< HEAD
 See Wiki for more information 
-=======
+
 ---
 
 ## How the app works
@@ -575,4 +574,3 @@ export function EmberCreature({ state }: EmberCreatureProps) {
 ```
 
 Write `@/components/ui/HPBar` instead of `../../../components/ui/HPBar` everywhere. Move a file anywhere and imports still work.
->>>>>>> 3597e9bbcd7b7362361101408937f8aac9f849e8

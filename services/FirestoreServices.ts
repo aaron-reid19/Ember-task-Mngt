@@ -8,19 +8,10 @@ import { doc,
     getDoc,
     getDocs } from "firebase/firestore";
 import { db } from "./firebaseConfig";
-import { db } from "@/firebase/config";
+// ! duplicate db import removed — was: import { db } from "@/firebase/config";
+// ← AARON: verify "./firebaseConfig" is the correct path
 import type { LocalEmberData } from "@/types/ember";
-
-
-export type EmberState = "Thriving" | "Steady" | "Strained" | "Flickering";
-export type TaskPriority = "low" | "medium" | "high";
-export type  QuestCadence = 
-    | "today"
-    | "daily"
-    | "weekly"
-    | "biweekly"
-    | "monthly"
-    | "custom";
+import type { EmberState, TaskPriority, QuestCadence } from "@/types";
 
 export type UserProfileInput = {
     displayName?: string | null;
@@ -282,26 +273,6 @@ export async function createQuest(userId: string, quest: QuestInput) {
       id: snapshot.id,
       ...snapshot.data(),
     };
-  }
-
-  export async function updateQuest(
-    userId: string,
-    questId: string,
-    updates: Partial<{
-      title: string;
-      description: string;
-      hpReward: number;
-      cadence: QuestCadence;
-      recurrenceRule: string | null;
-      completed: boolean;
-    }>
-  ) {
-    const questRef = doc(db, "users", userId, "quests", questId);
-  
-    await updateDoc(questRef, {
-      ...updates,
-      updatedAt: serverTimestamp(),
-    });
   }
 
 export async function deleteQuest(userId: string, questId: string) {

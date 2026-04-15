@@ -6,19 +6,14 @@
  * Status: 🟢 READY
  *
  * Dependencies:
- *   - L3: useTask(id) hook returning a single Task — Josh — PENDING
- *   - D7: FirestoreService.updateTask() — Aaron — PENDING
+ *   - L3: useTask(id) hook returning a single Task — Josh — 🟢 READY
+ *   - D7: useTasks().update() for persisting edits — Aaron — 🟢 READY
  *
  * Notes:
  *   Pushed onto the stack when the user taps a TaskListItem on the task list.
  *   The user can edit the task name, priority, and HP cost.
- *   All form values are held in local useState (interaction state — Kaley owns this).
- *   On save, the screen calls Aaron's FirestoreService.updateTask() to persist.
- *
- * WHERE MISSING WORK GETS ADDED:
- *   1. Replace hardcoded form defaults → useTask(id) to load real task data (Josh L3)
- *   2. Wire up the save button → FirestoreService.updateTask() (Aaron D7)
- *   3. Priority selector currently uses Badge as visual-only — needs onPress to switch
+ *   All form values are managed by React Hook Form + Zod.
+ *   On save, the screen calls useTasks().update() which routes through Josh's hook.
  *
  * SCREEN LAYOUT:
  *   ┌──────────────────────────────────┐
@@ -52,8 +47,8 @@ import Colors from "@/constants/Colors";
 import { Spacing } from "@/constants/Spacing";
 import { Typography } from "@/constants/Typography";
 import { useTask } from "@/hooks/useTask";
+import { useTasks } from "@/hooks/useTasks";
 import { useAuth } from "@/store/authContext";
-import { updateTask } from "@/services/FirestoreServices";
 
 // Zod schema — validation rules for the task edit form
 const taskSchema = z.object({
@@ -73,6 +68,7 @@ const PRIORITY_BADGE_COLORS: Record<TaskPriority, string> = {
 export default function TaskEditScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { task, loading } = useTask(id);
+  const { update: updateTask } = useTasks();
   const { user } = useAuth();
   const router = useRouter();
 
@@ -88,8 +84,7 @@ export default function TaskEditScreen() {
   const selectedPriority = watch("priority");
 
   const onSubmit = async (data: TaskFormData) => {
-    if (!user) return;
-    await updateTask(user.uid, id, {
+    await updateTask(id, {
       title: data.name,
       priority: data.priority,
       hpCost: data.hpCost,

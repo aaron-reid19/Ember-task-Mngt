@@ -38,17 +38,18 @@ import Colors from "@/constants/Colors";
 import { Typography } from "@/constants/Typography";
 import { Spacing } from "@/constants/Spacing";
 import { useQuest } from "@/hooks/useQuest";
+import { useQuests } from "@/hooks/useQuests";
 import { useAuth } from "@/store/authContext";
-import { updateQuest } from "@/services/FirestoreServices";
 
 export default function QuestDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { quest, loading } = useQuest(id);
+  const { update: updateQuest } = useQuests();
   const { user } = useAuth();
 
   async function handleMarkComplete() {
-    if (!user || !id) return;
-    await updateQuest(user.uid, id, { completed: true });
+    if (!id) return;
+    await updateQuest(id, { completed: true });
     router.replace("/(tabs)/quests");
   }
 

@@ -28,20 +28,20 @@ export function isQuestDueToday( quest: Quest, today: Date ): boolean {
   };
 
   switch (quest.cadence) {
-    case "Daily":
+    case "daily":
       return true;
-    case "Weekly": {
+    case "weekly": {
       const todayWeekDay = dayMap[today.getDay()];
       return quest.activeDays?.includes(todayWeekDay) ?? false;
     }
-    case "Biweekly": {
+    case "biweekly": {
       const start = new Date(quest.startDate!);
       const diffInMs = today.getTime() - start.getTime();
       const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
       return diffInDays % 14 === 0;
     }
-    case "Custom": 
-    case "Monthly": {
+    case "custom":
+    case "monthly": {
       const todayDate = today.getDate();
       const startDate = new Date(quest.startDate!).getDate();
       return todayDate === startDate;

@@ -29,15 +29,16 @@ type NotificationData = {
  *
  * @param data - The data object attached to the notification
  */
+// ← JOSH: Kaley applied this fix pre-submission to clear tsc errors — trailing slash removed
 function routeFromNotification(data: NotificationData): void {
   switch (data.type) {
     // Morning briefing → Home tab (Ember dashboard)
     case "morning":
-      router.push("/(tabs)/");
+      router.push("/(tabs)");
       break;
       // Daily Spark → Home tab (Spark card lives here)
     case "spark":
-      router.push("/(tabs)/");
+      router.push("/(tabs)");
       break;
       // Midnight Reckoning → Tasks tab (user needs to see incomplete tasks)
     case "midnight":
@@ -45,7 +46,7 @@ function routeFromNotification(data: NotificationData): void {
       break;
       // Unknown notification type — fall back to home
     default:
-      router.push("/(tabs)/");
+      router.push("/(tabs)");
   }
 }
 
