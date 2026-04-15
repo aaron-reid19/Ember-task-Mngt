@@ -44,7 +44,7 @@ import { useStreak } from "@/hooks/useStreak";
 import { useAuth } from "@/store/authContext";
 
 export default function QuestBoardScreen() {
-  const [selectedCadence, setSelectedCadence] = useState<QuestCadence>("daily");
+  const [selectedCadence, setSelectedCadence] = useState<QuestCadence>("all");
   const { hp, state } = useEmber();
   const { quests, toggle: toggleQuest } = useQuests(selectedCadence);
   const { current: streakDays } = useStreak();
@@ -67,10 +67,12 @@ export default function QuestBoardScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Quest Board</Text>
-      </View>
 
-      {/* Filter tabs — rendered outside ScrollView so they stay sticky */}
-      <QuestFilterTabs onSelect={handleTabSelect} />
+        {/* Filter tabs — give breathing room below the title */}
+        <View style={styles.filterTabsWrapper}>
+          <QuestFilterTabs onSelect={handleTabSelect} />
+        </View>
+      </View>
 
       <FlatList
         data={quests}
@@ -91,7 +93,9 @@ export default function QuestBoardScreen() {
                 <Text style={styles.pillText}>{hp} HP</Text>
               </View>
             </View>
-            <HPBar value={hp} state={state} height={8} />
+            <View style={styles.hpBarWrapper}>
+              <HPBar value={hp} state={state} height={8} />
+            </View>
           </>
         }
         renderItem={({ item: quest }) => (
@@ -116,16 +120,19 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingTop: Spacing.xl,
-    paddingBottom: Spacing.lg,
-    alignItems: "center",
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    paddingHorizontal: Spacing.screen,
+    paddingBottom: Spacing.sm,
     backgroundColor: Colors.bgDeep,
   },
   headerTitle: {
     fontSize: Typography.xl,
     fontWeight: Typography.bold,
     color: Colors.textPrimary,
+    textAlign: "center",
+    marginBottom: Spacing.lg,
+  },
+  filterTabsWrapper: {
+    marginBottom: Spacing.md,
   },
   content: {
     paddingHorizontal: Spacing.screen,
@@ -136,6 +143,10 @@ const styles = StyleSheet.create({
   statusStrip: {
     flexDirection: "row",
     gap: Spacing.sm,
+    marginBottom: Spacing.md,
+  },
+  hpBarWrapper: {
+    marginBottom: Spacing.lg,
   },
   pill: {
     backgroundColor: Colors.bgCard,

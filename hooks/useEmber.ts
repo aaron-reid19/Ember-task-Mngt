@@ -15,16 +15,21 @@
  *  - useAppStore for loading state
  */
 
-import { HPData } from "@/types";
+import { useEffect, useRef } from "react";
+import { HPData, Task } from "@/types";
 import { calculateHP, classifyHP, checkBonfire } from "@/utils/hpEngine";
 import { useTasks } from "./useTasks";
 import { useAppStore } from "@/store/useAppStore";
+import { useAuth } from "@/store/authContext";
+import { HPSyncService } from "@/services/HPSyncServices";
 
-export function useEmber(): HPData & { loading: boolean } {
-  const { tasks, loading: tasksLoading } = useTasks();
+export function useEmber(externalTasks?: Task[]): HPData & { loading: boolean } {
+  const { tasks: internalTasks, loading: tasksLoading } = useTasks();
   const { loading: storeLoading } = useAppStore();
+  const { user } = useAuth();
 
-  const loading = tasksLoading || storeLoading;
+  const tasks = externalTasks ?? internalTasks;
+  const loading = (externalTasks ? false : tasksLoading) || storeLoading;
 
   // Sum hpCost across all tasks and completed tasks
   const totalHP = tasks.reduce((sum, t) => sum + (t.hpCost ?? 0), 0);
@@ -34,9 +39,20 @@ export function useEmber(): HPData & { loading: boolean } {
 
   const isDailySparkCompleted = tasks.some((t) => t.isDailySpark && t.completed);
 
-  const hp = calculateHP(completedHP, totalHP);
+  const hp = Math.min(100, Math.ceil(calculateHP(completedHP, totalHP)));
   const state = classifyHP(hp);
   const isBonfire = checkBonfire(hp, isDailySparkCompleted);
+
+  // Persist HP to AsyncStorage + Firestore whenever it changes
+  const prevHP = useRef<number | null>(null);
+  useEffect(() => {
+    if (loading || prevHP.current === hp) return;
+    prevHP.current = hp;
+
+    if (user) {
+      HPSyncService.saveHPState(user.uid, { hp, visualState: state });
+    }
+  }, [hp, state, loading, user]);
 
   return { hp, state, isBonfire, loading };
 }

@@ -9,7 +9,6 @@
  *
  * TAB STRUCTURE (visible tabs):
  *   Home        → (tabs)/index.tsx
- *   Quest Board → (tabs)/quests.tsx      → Nested stack: quests/[id].tsx
  *   Add Quest   → (tabs)/add-quest.tsx
  *   Profile     → (tabs)/profile.tsx
  *
@@ -21,21 +20,28 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
-import { Typography } from "@/constants/Typography";
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
+        tabBarShowLabel: true,
         tabBarStyle: {
-          backgroundColor: Colors.tabBarBg,
-          borderTopColor: Colors.border,
+          backgroundColor: Colors.bgDeep,
+          borderTopWidth: 0,
+          height: 80,
+          paddingBottom: 16,
+          paddingTop: 8,
         },
-        tabBarActiveTintColor: Colors.tabBarActive,
-        tabBarInactiveTintColor: Colors.tabBarInactive,
+        tabBarActiveTintColor: Colors.accent,
+        tabBarInactiveTintColor: Colors.textMuted,
+        tabBarIconStyle: {
+          marginBottom: 2,
+        },
         tabBarLabelStyle: {
-          fontSize: Typography.xs,
+          fontSize: 11,
+          fontWeight: "600",
         },
       }}
     >
@@ -50,7 +56,7 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Tab 2: Quest Board — quest list with filter tabs */}
+      {/* Tab 2: Quest Board — quest list with cadence filters */}
       <Tabs.Screen
         name="quests"
         options={{
@@ -61,7 +67,7 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Tab 3: Add Quest — form to create a new quest */}
+      {/* Tab 2: Add Quest — form to create a new quest */}
       <Tabs.Screen
         name="add-quest"
         options={{
@@ -72,7 +78,7 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Tab 4: Profile — avatar, stats, HP trend, goal config */}
+      {/* Tab 3: Profile — avatar, stats, HP trend, goal config */}
       <Tabs.Screen
         name="profile"
         options={{

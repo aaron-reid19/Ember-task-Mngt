@@ -34,13 +34,13 @@ import { useEmberAnimation } from "./EmberAnimations";
 
 // ~ ─────────────────────────────────────────────────────────────────
 
-// ^ Real sprite assets in assets/images/ember-states/ — using first frame per state
-const EMBER_SPRITES: Record<EmberState, ImageSourcePropType> = {
-  Thriving: require("@/assets/images/ember-thriving.png"),
-  Steady: require("@/assets/images/ember-states/ember-steady1.png"),
-  Strained: require("@/assets/images/ember-states/ember-strain1.png"),
-  Flickering: require("@/assets/images/ember-states/ember-flicker1.png"),
-};
+// Sprite per state — largest/brightest flame for Thriving, smallest for Flickering
+const EMBER_SPRITES: [EmberState, ImageSourcePropType][] = [
+  ["Thriving", require("@/assets/images/ember-states/ember-steady3.png")],
+  ["Steady", require("@/assets/images/ember-states/ember-steady1.png")],
+  ["Strained", require("@/assets/images/ember-states/ember-strain3.png")],
+  ["Flickering", require("@/assets/images/ember-states/ember-flicker2.png")],
+];
 
 // ~ ─────────────────────────────────────────────────────────────────
 
@@ -60,12 +60,20 @@ export function EmberCreature({ state, isBonfire = false }: EmberCreatureProps) 
       <View style={styles.backdrop} />
 
       <Animated.View style={[styles.creatureWrapper, animatedStyle]}>
-        {/* 🟡 STUB — replace require() paths with real assets */}
-        <Image
-          source={EMBER_SPRITES[state]}
-          style={styles.sprite}
-          resizeMode="contain"
-        />
+        {/* All sprites rendered and stacked so they're pre-loaded in memory.
+            The active state is fully visible; others are hidden underneath. */}
+        {EMBER_SPRITES.map(([key, source]) => (
+          <Image
+            key={key}
+            source={source}
+            style={[
+              styles.sprite,
+              styles.spriteAbsolute,
+              { opacity: key === state ? 1 : 0 },
+            ]}
+            resizeMode="contain"
+          />
+        ))}
       </Animated.View>
     </View>
   );
@@ -92,11 +100,16 @@ const styles = StyleSheet.create({
   },
   creatureWrapper: {
     zIndex: 1,
+    width: 180,
+    height: 180,
     alignItems: "center",
     justifyContent: "center",
   },
   sprite: {
     width: 180,
     height: 180,
+  },
+  spriteAbsolute: {
+    position: "absolute",
   },
 });

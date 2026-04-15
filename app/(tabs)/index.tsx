@@ -30,10 +30,8 @@ import {
   StyleSheet,
   Text,
   View,
-  Pressable,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
 import { EmberCreature } from "@/components/ember/EmberCreature";
 import { HPBar } from "@/components/ui/HPBar";
 import { DailySparkCard } from "@/components/ember/DailySparkCard";
@@ -49,9 +47,9 @@ import { useAuth } from "@/store/authContext";
 import { useStreak } from "@/hooks/useStreak";
 
 export default function HomeScreen() {
-  const { hp, state, isBonfire } = useEmber();
-  const { spark: sparkTask } = useDailySpark();
   const { tasks, update: updateTask, toggle: toggleTask } = useTasks();
+  const { hp, state, isBonfire } = useEmber(tasks);
+  const { spark: sparkTask } = useDailySpark(tasks);
   const { user } = useAuth();
   const { current: streakDays } = useStreak();
 
@@ -128,9 +126,9 @@ export default function HomeScreen() {
         {/* Progress bar — HP earned vs total HP on the board */}
         <HPBar value={totalHP > 0 ? (completedHP / totalHP) * 100 : 100} state={state} height={6} />
 
-        {/* Task list — max 3 shown on Home */}
+        {/* Quest list — all quests shown inline */}
         <View style={styles.taskList}>
-          {tasks.slice(0, 3).map((task) => (
+          {tasks.map((task) => (
             <TaskListItem
               key={task.id}
               task={task}
@@ -138,12 +136,8 @@ export default function HomeScreen() {
             />
           ))}
         </View>
-
-        {/* See all link */}
-        <Pressable onPress={() => router.push("/(tabs)/tasks")}>
-          <Text style={styles.seeAllLink}>See All Today's Tasks →</Text>
-        </Pressable>
       </View>
+
     </ScrollView>
     </SafeAreaView>
   );
@@ -215,12 +209,5 @@ const styles = StyleSheet.create({
   },
   taskList: {
     marginTop: Spacing.sm,
-  },
-  seeAllLink: {
-    fontSize: Typography.md,
-    color: Colors.textSecondary,
-    textAlign: "center",
-    marginTop: Spacing.md,
-    fontWeight: Typography.medium,
   },
 });

@@ -36,7 +36,7 @@ export function useHPHistory(): { snapshots: HPSnapshot[]; loading: boolean } {
         const mapped: HPSnapshot[] = raw.map((doc: any) => ({
           date: doc.date ?? doc.createdAt?.toDate?.()?.toISOString?.() ?? "",
           hp: doc.hp ?? 0,
-          state: doc.state ?? "Flickering",
+          state: doc.visualState ?? doc.state ?? "Flickering",
         }));
         // Sort newest first
         mapped.sort((a, b) => b.date.localeCompare(a.date));

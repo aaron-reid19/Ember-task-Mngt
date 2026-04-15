@@ -55,7 +55,7 @@ export const EmberStates: Record<
     hpMax: 19,
     color: "#7B6A95",   // dark muted purple
     creatureScale: 0.9,
-    creatureOpacity: 0.45,
+    creatureOpacity: 0.6,
   },
 };
 

@@ -49,15 +49,17 @@ export function useQuests(cadence?: QuestCadence): {
         name: doc.title ?? doc.name ?? "",
         description: doc.description,
         hpCost: doc.hpReward ?? doc.hpCost ?? 0,
-        cadence: (doc.cadence ?? "today") as QuestCadence,
-        activeDays: doc.activeDays,
+        cadence: (doc.cadence ?? "daily") as QuestCadence,
+        activeDays: doc.recurrenceRule
+          ? doc.recurrenceRule.split(",")
+          : doc.activeDays ?? [],
         startDate: doc.startDate,
         completed: doc.completed ?? false,
         isDailySpark: doc.isDailySpark ?? false,
         status: doc.completed ? "complete" : "in progress",
       }));
 
-      if (cadence) {
+      if (cadence && cadence !== "all") {
         mapped = mapped.filter((q) => q.cadence === cadence);
       }
 

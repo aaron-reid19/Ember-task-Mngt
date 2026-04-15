@@ -4,6 +4,7 @@ import type { EmberState, LocalEmberData } from "@/types/ember";
 const STORAGE_KEYS = {
     hp: "ember_hp",
     visualState: "ember_visual_state",
+    dailyGoal: "ember_daily_goal",
 } as const;
 
 const DEFAULT_HP = 100;
@@ -111,6 +112,27 @@ export const AsyncStorageService = {
         } 
         catch (error) {
             console.error("Failed to write local Ember data:", error);
+            throw error;
+        }
+    },
+
+    async getDailyGoal(): Promise<number> {
+        try {
+            const stored = await AsyncStorage.getItem(STORAGE_KEYS.dailyGoal);
+            if (stored === null) return 5;
+            const parsed = Number(stored);
+            return Number.isNaN(parsed) ? 5 : Math.max(1, parsed);
+        } catch (error) {
+            console.error("Failed to read daily goal from AsyncStorage:", error);
+            return 5;
+        }
+    },
+
+    async setDailyGoal(goal: number): Promise<void> {
+        try {
+            await AsyncStorage.setItem(STORAGE_KEYS.dailyGoal, Math.max(1, goal).toString());
+        } catch (error) {
+            console.error("Failed to write daily goal to AsyncStorage:", error);
             throw error;
         }
     },
