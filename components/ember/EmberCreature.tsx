@@ -24,16 +24,13 @@
  *      Reason: out of MVP scope per ADR-001 sprint constraints
  */
 
-import React, { useEffect } from "react";
+import React from "react";
 import { StyleSheet, View, Image, ImageSourcePropType } from "react-native";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withTiming,
-} from "react-native-reanimated";
-import { EmberState, EmberStates } from "@/constants/EmberStates";
+import Animated from "react-native-reanimated";
+import type { EmberState } from "@/types";
+import { EmberStates } from "@/constants/EmberStates";
 import Colors from "@/constants/Colors";
+import { useEmberAnimation } from "./EmberAnimations";
 
 // ~ ─────────────────────────────────────────────────────────────────
 
@@ -55,30 +52,14 @@ interface EmberCreatureProps {
 // ~ ─────────────────────────────────────────────────────────────────
 
 export function EmberCreature({ state, isBonfire = false }: EmberCreatureProps) {
-  const scale = useSharedValue(EmberStates[state].creatureScale);
-  const opacity = useSharedValue(EmberStates[state].creatureOpacity);
-
-  // * Animate whenever state prop changes — prop drives the animation
-  useEffect(() => {
-    const config = EmberStates[state];
-    scale.value = withSpring(isBonfire ? 1.3 : config.creatureScale, {
-      damping: 12,
-      stiffness: 100,
-    });
-    opacity.value = withTiming(config.creatureOpacity, { duration: 500 });
-  }, [state, isBonfire]);
-
-  const animStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-    opacity: opacity.value,
-  }));
+  const { animatedStyle } = useEmberAnimation({ state, isBonfire });
 
   return (
     <View style={styles.container}>
       {/* Semicircle backdrop — the purple arc behind the creature in Figma */}
       <View style={styles.backdrop} />
 
-      <Animated.View style={[styles.creatureWrapper, animStyle]}>
+      <Animated.View style={[styles.creatureWrapper, animatedStyle]}>
         {/* 🟡 STUB — replace require() paths with real assets */}
         <Image
           source={EMBER_SPRITES[state]}

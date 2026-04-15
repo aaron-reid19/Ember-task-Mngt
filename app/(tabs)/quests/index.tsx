@@ -24,7 +24,7 @@
 
 import React, { useState } from "react";
 import {
-  ScrollView,
+  FlatList,
   StyleSheet,
   Text,
   View,
@@ -42,12 +42,11 @@ import { useEmber } from "@/hooks/useEmber";
 import { useQuests } from "@/hooks/useQuests";
 import { useStreak } from "@/hooks/useStreak";
 import { useAuth } from "@/store/authContext";
-import { updateQuest } from "@/services/FirestoreServices";
 
 export default function QuestBoardScreen() {
-  const [selectedCadence, setSelectedCadence] = useState<QuestCadence>("Daily");
+  const [selectedCadence, setSelectedCadence] = useState<QuestCadence>("daily");
   const { hp, state } = useEmber();
-  const { quests, refresh: refreshQuests } = useQuests(selectedCadence);
+  const { quests, toggle: toggleQuest } = useQuests(selectedCadence);
   const { current: streakDays } = useStreak();
   const { user } = useAuth();
 
@@ -60,11 +59,7 @@ export default function QuestBoardScreen() {
   }
 
   async function handleQuestToggle(questId: string) {
-    if (!user) return;
-    const quest = quests.find((q) => q.id === questId);
-    if (!quest) return;
-    await updateQuest(user.uid, questId, { completed: !quest.completed });
-    refreshQuests();
+    await toggleQuest(questId);
   }
 
   return (
@@ -77,36 +72,37 @@ export default function QuestBoardScreen() {
       {/* Filter tabs — rendered outside ScrollView so they stay sticky */}
       <QuestFilterTabs onSelect={handleTabSelect} />
 
-      <ScrollView
+      <FlatList
+        data={quests}
+        keyExtractor={(item) => item.id}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
-      >
-        {/* Status strip + HP bar */}
-        <View style={styles.statusStrip}>
-          <View style={styles.pill}>
-            <Text style={styles.pillText}>🔥 {streakDays}-Day Streak</Text>
-          </View>
-          <View style={styles.pill}>
-            <Text style={styles.pillText}>{state}</Text>
-          </View>
-          <View style={styles.pill}>
-            <Text style={styles.pillText}>{hp} HP</Text>
-          </View>
-        </View>
-        <HPBar value={hp} state={state} height={8} />
-
-        {/* Quest list */}
-        <View style={styles.questList}>
-          {quests.map((quest) => (
-              <QuestCard
-                key={quest.id}
-                quest={quest}
-                onPress={() => handleQuestPress(quest.id)}
-                onToggle={() => handleQuestToggle(quest.id)}
-              />
-            ))}
-        </View>
-      </ScrollView>
+        ListHeaderComponent={
+          <>
+            {/* Status strip + HP bar */}
+            <View style={styles.statusStrip}>
+              <View style={styles.pill}>
+                <Text style={styles.pillText}>🔥 {streakDays}-Day Streak</Text>
+              </View>
+              <View style={styles.pill}>
+                <Text style={styles.pillText}>{state}</Text>
+              </View>
+              <View style={styles.pill}>
+                <Text style={styles.pillText}>{hp} HP</Text>
+              </View>
+            </View>
+            <HPBar value={hp} state={state} height={8} />
+          </>
+        }
+        renderItem={({ item: quest }) => (
+          <QuestCard
+            quest={quest}
+            onPress={() => handleQuestPress(quest.id)}
+            onToggle={() => handleQuestToggle(quest.id)}
+          />
+        )}
+        ItemSeparatorComponent={() => <View style={{ height: Spacing.cardGap }} />}
+      />
     </SafeAreaView>
   );
 }

@@ -4,7 +4,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
+  Pressable,
   View,
   KeyboardAvoidingView,
   Platform,
@@ -138,7 +138,7 @@ export default function LoginScreen() {
                     autoComplete="password"
                     returnKeyType="done"
                   />
-                  <TouchableOpacity
+                  <Pressable
                     onPress={() => setShowPassword((prev) => !prev)}
                     hitSlop={8}
                   >
@@ -147,7 +147,7 @@ export default function LoginScreen() {
                       size={20}
                       color={Colors.textMuted}
                     />
-                  </TouchableOpacity>
+                  </Pressable>
                 </View>
               )}
             />
@@ -183,17 +183,16 @@ export default function LoginScreen() {
           </View>
 
           {/* Demo shortcut */}
-          <TouchableOpacity
+          <Pressable
             style={styles.demoButton}
             onPress={onDemoLogin}
             disabled={submitting}
-            activeOpacity={0.7}
           >
             <Ionicons name="flash" size={16} color={Colors.accent} />
             <Text style={styles.demoButtonText}>
               {submitting ? "Signing in..." : "Skip — use demo account"}
             </Text>
-          </TouchableOpacity>
+          </Pressable>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

@@ -12,4 +12,5 @@
 
 export type { EmberState, HPData, HPSnapshot } from "./ember";
 export type { Task, TaskPriority, TaskTag } from "./task";
+export { CADENCE_LABELS } from "./quest";
 export type { Quest, QuestCadence, WeekDay } from "./quest";

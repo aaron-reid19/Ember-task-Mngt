@@ -24,7 +24,8 @@ import Animated, {
   Easing,
 } from "react-native-reanimated";
 import Colors from "@/constants/Colors";
-import { EmberState, EmberStates } from "@/constants/EmberStates";
+import type { EmberState } from "@/types";
+import { EmberStates } from "@/constants/EmberStates";
 
 // ~ ─────────────────────────────────────────────────────────────────
 
