@@ -6,12 +6,12 @@
  * Status: 🟢 READY
  *
  * Dependencies:
- *   - L1, L2: useEmber() returning { hp, state, isBonfire } — Josh — PENDING
- *   - L4: useDailySpark() returning { task, onComplete } — Josh — PENDING
- *   - L3: task HP restoration on complete — Josh — PENDING
- *   - D3: AsyncStorage HP read on mount — Aaron — PENDING
+ *   - L1, L2: useEmber() returning { hp, state, isBonfire } — Josh — READY
+ *   - L4: useDailySpark() returning { spark } — Josh — READY
+ *   - L3: quest HP restoration on complete — Josh — READY
+ *   - D3: AsyncStorage HP read on mount — Aaron — READY
  *
- *   HP is driven by task hpCost values:
+ *   HP is driven by quest hpCost values:
  *     HP = (sum completed hpCost / sum total hpCost) × 100
  *
  * Notes:
@@ -19,8 +19,8 @@
  *     Smoldering (12 HP) → Glowing (22–32 HP) → Steady (42 HP)
  *     → Thriving (90 HP) → Bonfire (100 HP)
  *   The creature grows and brightens as HP increases.
- *   "Good Morning, [name]" greeting — name comes from user profile (Aaron/Josh TBD).
- *   Today's Progress section shows up to 3 tasks + "See All Today's Tasks →" link.
+ *   "Good Morning, [name]" greeting — name comes from user profile.
+ *   Today's Progress section shows quests + HP bar.
  *   Coordinator only — no calculations, no animations defined here.
  */
 
@@ -36,48 +36,47 @@ import { EmberCreature } from "@/components/ember/EmberCreature";
 import { HPBar } from "@/components/ui/HPBar";
 import { DailySparkCard } from "@/components/ember/DailySparkCard";
 import { BonfireIndicator } from "@/components/ember/BonfireIndicator";
-import { TaskListItem } from "@/components/tasks/TaskListItem";
+import { QuestListItem } from "@/components/quests/QuestListItem";
 import Colors from "@/constants/Colors";
 import { Typography } from "@/constants/Typography";
 import { Spacing } from "@/constants/Spacing";
 import { useEmber } from "@/hooks/useEmber";
 import { useDailySpark } from "@/hooks/useDailySpark";
-import { useTasks } from "@/hooks/useTasks";
+import { useQuests } from "@/hooks/useQuests";
 import { useAuth } from "@/store/authContext";
 import { useStreak } from "@/hooks/useStreak";
 
 export default function HomeScreen() {
-  const { tasks, update: updateTask, toggle: toggleTask } = useTasks();
-  const { hp, state, isBonfire } = useEmber(tasks);
-  const { spark: sparkTask } = useDailySpark(tasks);
+  const { quests, update: updateQuest, toggle: toggleQuest } = useQuests();
+  const { hp, state, isBonfire } = useEmber(quests);
+  const { spark: sparkQuest } = useDailySpark(quests);
   const { user } = useAuth();
   const { current: streakDays } = useStreak();
 
-  const completedCount = tasks.filter((t) => t.completed).length;
-  const totalHP = tasks.reduce((sum, t) => sum + (t.hpCost ?? 0), 0);
-  const completedHP = tasks.filter((t) => t.completed).reduce((sum, t) => sum + (t.hpCost ?? 0), 0);
+  const totalHP = quests.reduce((sum, q) => sum + (q.hpCost ?? 0), 0);
+  const completedHP = quests.filter((q) => q.completed).reduce((sum, q) => sum + (q.hpCost ?? 0), 0);
   const userName = user?.displayName ?? "Explorer";
 
-  // Build a spark quest object for the DailySparkCard component
-  const sparkQuest = sparkTask
+  // Build a spark card object for the DailySparkCard component
+  const sparkCard = sparkQuest
     ? {
-        id: sparkTask.id,
-        name: sparkTask.name,
-        hpCost: sparkTask.hpCost,
-        completed: sparkTask.completed,
+        id: sparkQuest.id,
+        name: sparkQuest.name,
+        hpCost: sparkQuest.hpCost,
+        completed: sparkQuest.completed,
         isDailySpark: true,
         cadence: "daily" as const,
-        status: (sparkTask.completed ? "complete" : "in progress") as "complete" | "in progress",
+        status: (sparkQuest.completed ? "complete" : "in progress") as "complete" | "in progress",
       }
     : null;
 
   async function handleSparkComplete() {
-    if (!sparkTask) return;
-    await updateTask(sparkTask.id, { completed: true });
+    if (!sparkQuest) return;
+    await toggleQuest(sparkQuest.id);
   }
 
-  async function handleTaskToggle(taskId: string) {
-    await toggleTask(taskId);
+  async function handleQuestToggle(questId: string) {
+    await toggleQuest(questId);
   }
 
   return (
@@ -112,7 +111,7 @@ export default function HomeScreen() {
       {isBonfire && <BonfireIndicator />}
 
       {/* Daily Spark card */}
-      {sparkQuest && <DailySparkCard task={sparkQuest} onComplete={handleSparkComplete} />}
+      {sparkCard && <DailySparkCard quest={sparkCard} onComplete={handleSparkComplete} />}
 
       {/* Today's Progress */}
       <View style={styles.progressSection}>
@@ -127,12 +126,12 @@ export default function HomeScreen() {
         <HPBar value={totalHP > 0 ? (completedHP / totalHP) * 100 : 100} state={state} height={6} />
 
         {/* Quest list — all quests shown inline */}
-        <View style={styles.taskList}>
-          {tasks.map((task) => (
-            <TaskListItem
-              key={task.id}
-              task={task}
-              onToggle={() => handleTaskToggle(task.id)}
+        <View style={styles.questList}>
+          {quests.map((quest) => (
+            <QuestListItem
+              key={quest.id}
+              quest={quest}
+              onToggle={() => handleQuestToggle(quest.id)}
             />
           ))}
         </View>
@@ -197,17 +196,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   progressTitle: {
-    fontSize: Typography.md,
-    fontWeight: Typography.extraBold,
+    fontSize: Typography.xl,
+    fontWeight: Typography.bold,
     color: Colors.textPrimary,
-    letterSpacing: Typography.capsTracking,
   },
   progressCount: {
     fontSize: Typography.sm,
     color: Colors.textSecondary,
     fontWeight: Typography.medium,
   },
-  taskList: {
+  questList: {
     marginTop: Spacing.sm,
   },
 });

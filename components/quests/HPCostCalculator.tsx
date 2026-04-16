@@ -2,7 +2,7 @@
  * Ember — HPCostCalculator
  * Layer: UI
  * Owner: Kaley
- * Task IDs: U7 (Task edit), also used in Add Quest (U4)
+ * Task IDs: U7 (Quest edit), also used in Add Quest (U4)
  * Status: 🟢 READY
  *
  * Notes:
@@ -10,7 +10,8 @@
  *   The stepper value and its local state are Kaley's to own.
  *   The HP deduction on save is Josh's L3 — do not write that here.
  *   Fires onCostChange(newValue) so the parent screen can pass it to the save handler.
- *   * Self-contained — no sub-components, no hook imports.
+ *   // * Self-contained — no sub-components, no hook imports.
+ *   // * Name kept (HPCostCalculator) — not quest-specific
  */
 
 import React, { useState } from "react";

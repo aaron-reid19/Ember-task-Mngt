@@ -6,11 +6,18 @@
  * Status: 🟢 READY
  *
  * Notes:
- *   Import all types from here: import { Task } from '@/types'
+ *   Import all types from here: import { Quest } from '@/types'
  *   Never import directly from the individual type files — use this barrel.
+ *   // * Task / TaskPriority / TaskTag were retired — use Quest / QuestPriority / QuestTag
  */
 
 export type { EmberState, HPData, HPSnapshot } from "./ember";
-export type { Task, TaskPriority, TaskTag } from "./task";
 export { CADENCE_LABELS } from "./quest";
-export type { Quest, QuestCadence, WeekDay } from "./quest";
+export type {
+  Quest,
+  QuestCadence,
+  QuestPriority,
+  QuestTag,
+  WeekDay,
+  NewQuest,
+} from "./quest";

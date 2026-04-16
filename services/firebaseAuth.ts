@@ -1,3 +1,21 @@
+/**
+ * Ember — Firebase Auth Service
+ * Layer: Data
+ * Owner: Aaron
+ * Task IDs: D1, D2
+ * Status: 🟢 READY
+ *
+ * Dependencies:
+ *   - firebaseConfig.ts: initialized `auth` instance — Aaron — READY
+ *   - FirestoreServices.ensureUserProfile(): creates the user doc on first sign-in — Aaron — READY
+ *
+ * Notes:
+ *   Wraps Firebase Auth sign-in / sign-up / sign-out / Google credential flows and
+ *   maps Firebase error codes to human-friendly strings for the UI layer.
+ *   // * friendlyError() keeps Kaley's screens free of raw Firebase error codes
+ *   // & consumed by store/authContext.tsx — do not bypass the context
+ */
+
 import {
     GoogleAuthProvider,
     signInWithCredential,

@@ -56,11 +56,11 @@ export default function GoalSetupScreen() {
       <View style={styles.centeredContent}>
         <Text style={styles.welcomeTitle}>Welcome to Ember</Text>
         <Text style={styles.subtitle}>
-          Your tasks fuel Ember's fire.
+          Your quests fuel Ember's fire.
         </Text>
         <Text style={styles.description}>
-          Every task you add has an HP cost. Complete tasks to restore
-          Ember's health — the heavier the task, the bigger the boost.
+          Every quest you add has an HP cost. Complete quests to restore
+          Ember's health — the heavier the quest, the bigger the boost.
         </Text>
 
         <Button

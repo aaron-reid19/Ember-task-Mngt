@@ -2,7 +2,7 @@
  * Ember — Badge
  * Layer: UI
  * Owner: Kaley
- * Task IDs: used by QuestCard (cadence tag), TaskListItem (priority/tag)
+ * Task IDs: used by QuestCard (cadence tag), QuestListItem (priority/tag)
  * Status: 🟢 READY
  *
  * Notes:

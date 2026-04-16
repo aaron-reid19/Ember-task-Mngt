@@ -6,14 +6,21 @@
  * Status: 🟢 READY
  *
  * Notes:
- *   Line chart showing HP over time with Week/Month toggle.
- *   Line segments are color-coded by Ember state thresholds.
- *   Includes back/forward arrows to navigate through historical periods.
+ *   Clean single-line HP trend chart with Week/Month toggle.
+ *   Smooth amber line over deep background, gradient area fill,
+ *   single endpoint marker on the most recent data point.
  */
 
 import React, { useMemo, useState } from "react";
 import { View, Text, Pressable, StyleSheet, LayoutChangeEvent } from "react-native";
-import Svg, { Circle, Line, Rect, Text as SvgText } from "react-native-svg";
+import Svg, {
+  Circle,
+  Defs,
+  LinearGradient,
+  Path,
+  Stop,
+  Text as SvgText,
+} from "react-native-svg";
 import { Ionicons } from "@expo/vector-icons";
 import type { HPSnapshot } from "@/types";
 import { EmberStates } from "@/constants/EmberStates";
@@ -21,24 +28,25 @@ import Colors from "@/constants/Colors";
 import { Spacing } from "@/constants/Spacing";
 import { Typography } from "@/constants/Typography";
 
+export type ChartRange = "weekly" | "monthly";
+
 type HPTrendChartProps = {
   snapshots: HPSnapshot[];
+  activeRange: ChartRange;
+  onRangeChange: (range: ChartRange) => void;
 };
-
-type ChartRange = "weekly" | "monthly";
 
 const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const MONTH_WEEK_LABELS = ["Wk 1", "Wk 2", "Wk 3", "Wk 4"];
 
-/** Get the color for an HP value based on Ember state thresholds */
-function getHPColor(hp: number): string {
-  if (hp >= EmberStates.Thriving.hpMin) return EmberStates.Thriving.color;
-  if (hp >= EmberStates.Steady.hpMin) return EmberStates.Steady.color;
-  if (hp >= EmberStates.Strained.hpMin) return EmberStates.Strained.color;
-  return EmberStates.Flickering.color;
-}
+const CHART_HEIGHT = 180;
+const PADDING_LEFT = 16;
+const PADDING_RIGHT = 16;
+const PADDING_TOP = 16;
+const PADDING_BOTTOM = 28;
 
-/** Get the Monday of the week containing a given date */
+const LINE_COLOR = EmberStates.Thriving.color;
+
 function getWeekStart(date: Date): Date {
   const d = new Date(date);
   const day = d.getDay();
@@ -48,12 +56,10 @@ function getWeekStart(date: Date): Date {
   return d;
 }
 
-/** Get the first day of the month containing a given date */
 function getMonthStart(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), 1);
 }
 
-/** Format a date range label */
 function formatPeriodLabel(start: Date, range: ChartRange): string {
   const opts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" };
   if (range === "weekly") {
@@ -72,18 +78,31 @@ function isCurrentPeriod(periodStart: Date, range: ChartRange): boolean {
   return periodStart.getTime() === getMonthStart(now).getTime();
 }
 
-export function HPTrendChart({ snapshots }: HPTrendChartProps) {
-  const [activeRange, setActiveRange] = useState<ChartRange>("weekly");
+/** Build a smoothed SVG path through the given points using Catmull-Rom → Bezier. */
+function buildSmoothPath(pts: { x: number; y: number }[]): string {
+  if (pts.length === 0) return "";
+  if (pts.length === 1) return `M ${pts[0].x} ${pts[0].y}`;
+  let d = `M ${pts[0].x} ${pts[0].y}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] ?? pts[i];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[i + 2] ?? p2;
+    const cp1x = p1.x + (p2.x - p0.x) / 6;
+    const cp1y = p1.y + (p2.y - p0.y) / 6;
+    const cp2x = p2.x - (p3.x - p1.x) / 6;
+    const cp2y = p2.y - (p3.y - p1.y) / 6;
+    d += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
+  }
+  return d;
+}
+
+export function HPTrendChart({ snapshots, activeRange, onRangeChange }: HPTrendChartProps) {
   const [offset, setOffset] = useState(0);
   const [chartWidth, setChartWidth] = useState(280);
 
-  const CHART_HEIGHT = 160;
-  const PADDING_X = 16;
-  const PADDING_TOP = 20;
-  const PADDING_BOTTOM = 28;
-
   function handleRangeChange(range: ChartRange) {
-    setActiveRange(range);
+    onRangeChange(range);
     setOffset(0);
   }
 
@@ -134,40 +153,30 @@ export function HPTrendChart({ snapshots }: HPTrendChartProps) {
 
   const hasData = dataPoints.some((d) => d !== null);
   const isCurrent = isCurrentPeriod(periodStart, activeRange);
+  const activeIndex = dataPoints.reduce(
+    (last, val, i) => (val !== null ? i : last),
+    -1,
+  );
 
-  const drawableWidth = chartWidth - PADDING_X * 2;
+  const drawableWidth = chartWidth - PADDING_LEFT - PADDING_RIGHT;
   const drawableHeight = CHART_HEIGHT - PADDING_TOP - PADDING_BOTTOM;
 
-  // Build points with coordinates and colors
   const points = dataPoints
     .map((val, i) => {
       if (val === null) return null;
-      const x = PADDING_X + (i / (dataPoints.length - 1)) * drawableWidth;
+      const x = PADDING_LEFT + (i / (dataPoints.length - 1)) * drawableWidth;
       const y = PADDING_TOP + drawableHeight - (val / 100) * drawableHeight;
-      return { x, y, val, color: getHPColor(val) };
+      return { x, y, val };
     })
-    .filter(Boolean) as { x: number; y: number; val: number; color: string }[];
+    .filter(Boolean) as { x: number; y: number; val: number }[];
 
-  // Build colored line segments between consecutive points
-  const segments: { x1: number; y1: number; x2: number; y2: number; color: string }[] = [];
-  for (let i = 0; i < points.length - 1; i++) {
-    const avgHP = (points[i].val + points[i + 1].val) / 2;
-    segments.push({
-      x1: points[i].x,
-      y1: points[i].y,
-      x2: points[i + 1].x,
-      y2: points[i + 1].y,
-      color: getHPColor(avgHP),
-    });
-  }
+  const linePath = buildSmoothPath(points);
+  const areaPath =
+    points.length > 0
+      ? `${linePath} L ${points[points.length - 1].x} ${PADDING_TOP + drawableHeight} L ${points[0].x} ${PADDING_TOP + drawableHeight} Z`
+      : "";
 
-  // State zone bands for background
-  const zones = [
-    { min: 80, max: 100, color: EmberStates.Thriving.color, label: "Thriving" },
-    { min: 50, max: 79, color: EmberStates.Steady.color, label: "Steady" },
-    { min: 20, max: 49, color: EmberStates.Strained.color, label: "Strained" },
-    { min: 0, max: 19, color: EmberStates.Flickering.color, label: "Flickering" },
-  ];
+  const endPoint = points[points.length - 1];
 
   function handleLayout(e: LayoutChangeEvent) {
     setChartWidth(e.nativeEvent.layout.width);
@@ -175,29 +184,6 @@ export function HPTrendChart({ snapshots }: HPTrendChartProps) {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.headerRow}>
-        <Text style={styles.sectionTitle}>HP Trend</Text>
-        <View style={styles.toggleGroup}>
-          <Pressable
-            onPress={() => handleRangeChange("weekly")}
-            style={[styles.toggleButton, activeRange === "weekly" && styles.toggleButtonActive]}
-          >
-            <Text style={[styles.toggleLabel, activeRange === "weekly" && styles.toggleLabelActive]}>
-              Weekly
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={() => handleRangeChange("monthly")}
-            style={[styles.toggleButton, activeRange === "monthly" && styles.toggleButtonActive]}
-          >
-            <Text style={[styles.toggleLabel, activeRange === "monthly" && styles.toggleLabelActive]}>
-              Monthly
-            </Text>
-          </Pressable>
-        </View>
-      </View>
-
       {/* Period navigation */}
       <View style={styles.navRow}>
         <Pressable onPress={() => setOffset((o) => o + 1)} hitSlop={12}>
@@ -225,74 +211,52 @@ export function HPTrendChart({ snapshots }: HPTrendChartProps) {
           </View>
         ) : (
           <Svg width={chartWidth} height={CHART_HEIGHT}>
-            {/* Background zone bands */}
-            {zones.map((zone) => {
-              const yTop = PADDING_TOP + drawableHeight - (zone.max / 100) * drawableHeight;
-              const yBot = PADDING_TOP + drawableHeight - (zone.min / 100) * drawableHeight;
-              return (
-                <React.Fragment key={zone.label}>
-                  <Rect
-                    x={PADDING_X}
-                    y={yTop}
-                    width={drawableWidth}
-                    height={yBot - yTop}
-                    fill={zone.color}
-                    opacity={0.08}
-                  />
-                  <SvgText
-                    x={chartWidth - PADDING_X - 2}
-                    y={yTop + (yBot - yTop) / 2 + 3}
-                    fontSize={8}
-                    fill={zone.color}
-                    opacity={0.5}
-                    textAnchor="end"
-                  >
-                    {zone.label}
-                  </SvgText>
-                </React.Fragment>
-              );
-            })}
+            <Defs>
+              <LinearGradient id="hpAreaFill" x1="0" y1="0" x2="0" y2="1">
+                <Stop offset="0" stopColor={LINE_COLOR} stopOpacity={0.35} />
+                <Stop offset="1" stopColor={LINE_COLOR} stopOpacity={0} />
+              </LinearGradient>
+            </Defs>
 
-            {/* Colored line segments */}
-            {segments.map((seg, i) => (
-              <Line
-                key={i}
-                x1={seg.x1}
-                y1={seg.y1}
-                x2={seg.x2}
-                y2={seg.y2}
-                stroke={seg.color}
-                strokeWidth={2.5}
-                strokeLinecap="round"
-              />
-            ))}
+            {/* Area gradient under line */}
+            {areaPath !== "" && <Path d={areaPath} fill="url(#hpAreaFill)" />}
 
-            {/* Data points with state-colored dots */}
-            {points.map((p, i) => (
-              <Circle
-                key={i}
-                cx={p.x}
-                cy={p.y}
-                r={5}
-                fill={p.color}
-                stroke={Colors.bgDeep}
-                strokeWidth={2}
-              />
-            ))}
+            {/* Smooth line */}
+            <Path
+              d={linePath}
+              stroke={LINE_COLOR}
+              strokeWidth={2.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+            />
+
+            {/* Active endpoint marker */}
+            {endPoint && (
+              <>
+                <Circle cx={endPoint.x} cy={endPoint.y} r={6} fill={LINE_COLOR} />
+                <Circle
+                  cx={endPoint.x}
+                  cy={endPoint.y}
+                  r={3}
+                  fill={Colors.bgDeep}
+                />
+              </>
+            )}
 
             {/* X-axis labels */}
             {labels.map((label, i) => {
-              const x = PADDING_X + (i / (labels.length - 1)) * drawableWidth;
-              const isActive = dataPoints[i] !== null;
+              const x = PADDING_LEFT + (i / (labels.length - 1)) * drawableWidth;
+              const isActive = i === activeIndex;
               return (
                 <SvgText
                   key={i}
                   x={x}
-                  y={CHART_HEIGHT - 6}
-                  fontSize={10}
-                  fill={isActive ? Colors.textPrimary : Colors.textMuted}
+                  y={CHART_HEIGHT - 8}
+                  fontSize={Typography.caption}
+                  fill={isActive ? Colors.accent : Colors.textMuted}
                   textAnchor="middle"
-                  fontWeight={isActive ? "600" : "400"}
+                  fontWeight={Typography.regular}
                 >
                   {label}
                 </SvgText>
@@ -300,16 +264,6 @@ export function HPTrendChart({ snapshots }: HPTrendChartProps) {
             })}
           </Svg>
         )}
-      </View>
-
-      {/* Legend */}
-      <View style={styles.legend}>
-        {zones.map((zone) => (
-          <View key={zone.label} style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: zone.color }]} />
-            <Text style={styles.legendLabel}>{zone.label}</Text>
-          </View>
-        ))}
       </View>
     </View>
   );
@@ -325,10 +279,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: Spacing.sm,
   },
+  toggleRow: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginBottom: Spacing.sm,
+  },
   sectionTitle: {
     color: Colors.textPrimary,
     fontSize: Typography.xl,
-    fontWeight: Typography.semiBold,
+    fontWeight: Typography.bold,
   },
   toggleGroup: {
     flexDirection: "row",
@@ -337,8 +296,8 @@ const styles = StyleSheet.create({
   toggleButton: {
     paddingVertical: Spacing.xs,
     paddingHorizontal: Spacing.md,
-    borderRadius: 12,
-    backgroundColor: Colors.bgCardAlt,
+    borderRadius: Spacing.md,
+    backgroundColor: "transparent",
   },
   toggleButtonActive: {
     backgroundColor: Colors.accent,
@@ -365,8 +324,8 @@ const styles = StyleSheet.create({
     fontWeight: Typography.medium,
   },
   chartArea: {
-    height: 160,
-    borderRadius: 12,
+    height: CHART_HEIGHT,
+    borderRadius: Spacing.md,
     backgroundColor: Colors.bgDeep,
     overflow: "hidden",
   },
@@ -378,25 +337,5 @@ const styles = StyleSheet.create({
   emptyText: {
     color: Colors.textMuted,
     fontSize: Typography.sm,
-  },
-  legend: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: Spacing.md,
-    marginTop: Spacing.sm,
-  },
-  legendItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  legendDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  legendLabel: {
-    fontSize: Typography.xs,
-    color: Colors.textMuted,
   },
 });

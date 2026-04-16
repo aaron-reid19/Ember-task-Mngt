@@ -20,13 +20,13 @@ import { EmberStates } from "@/constants/EmberStates";
 import { EmberState } from "@/types/ember";
 import { BONFIRE_HP_THRESHOLD } from "@/constants/EmberStates";
 
-/** Calculates Ember's HP as a percentage of completed tasks over daily goal. */
-export function calculateHP( completedTasks: number, dailyGoal: number ): number {
+/** Calculates Ember's HP as a percentage of completed quests over daily goal. */
+export function calculateHP( completedQuests: number, dailyGoal: number ): number {
   // ^ EDGE CASE: Checks if dailyGoal is equal to or less than zero to avoid failure
   if (dailyGoal <= 0) {
     return 0;
   }
-  return (completedTasks / dailyGoal) * 100;
+  return (completedQuests / dailyGoal) * 100;
 }
 
 /** Maps a raw HP number to an EmberState using thresholds from EmberStates.ts. */
@@ -52,8 +52,8 @@ export function checkBonfire( hp: number, isDailySparkComplete: boolean ): boole
   return hp >= BONFIRE_HP_THRESHOLD && isDailySparkComplete;
 }
 
-/** Calculates HP received for completing a single task */
-export function calculateTaskHP( dailyGoal: number ): number {
+/** Calculates HP received for completing a single quest */
+export function calculateQuestHP( dailyGoal: number ): number {
   // ^ EDGE CASE: Checks if dailyGoal is equal to or less than zero to avoid failure
   if (dailyGoal <= 0) {
     return 100;

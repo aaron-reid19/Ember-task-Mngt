@@ -12,6 +12,7 @@
 
 export const Typography = {
   // * Font sizes
+  caption: 10,    // * added for HPTrendChart — confirm matches Figma
   xs: 11,
   sm: 13,
   md: 15,

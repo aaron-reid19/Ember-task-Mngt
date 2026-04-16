@@ -2,11 +2,12 @@
  * Ember — useQuest.ts
  * Layer: Logic
  * Owner: Josh
- * Task IDs: L7
+ * Task IDs: L3, L7
  * Status: 🟢 READY
  *
  * Notes:
  *  - Returns a single quest by ID from Firestore
+ *  - Absorbed the former useTask hook — Task was retired in favour of Quest
  *
  * Dependencies:
  *  - AuthContext for current user ID
@@ -37,14 +38,18 @@ export function useQuest(id: string): { quest: Quest | null; loading: boolean } 
           setQuest({
             id: doc.id,
             name: doc.title ?? doc.name ?? "",
+            title: doc.title,
             description: doc.description,
-            hpCost: doc.hpReward ?? doc.hpCost ?? 0,
+            hpCost: doc.hpCost ?? doc.hpReward ?? 0,
             cadence: (doc.cadence ?? "today") as QuestCadence,
             activeDays: doc.activeDays,
             startDate: doc.startDate,
             completed: doc.completed ?? false,
             isDailySpark: doc.isDailySpark ?? false,
             status: doc.completed ? "complete" : "in progress",
+            priority: doc.priority ?? "medium",
+            tags: doc.tags ?? [],
+            createdAt: doc.createdAt?.toDate?.()?.toISOString?.() ?? doc.createdAt ?? "",
           });
         } else {
           setQuest(null);

@@ -2,7 +2,7 @@
  * Ember — Card
  * Layer: UI
  * Owner: Kaley
- * Task IDs: used by DailySparkCard, QuestCard, TaskListItem
+ * Task IDs: used by DailySparkCard, QuestCard, QuestListItem
  * Status: 🟢 READY
  *
  * Notes:

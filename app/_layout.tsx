@@ -13,23 +13,21 @@
  *   Font loading (if custom fonts are added) would go here via expo-font's useFonts().
  */
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Stack } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NotificationBanner } from "@/components/ui/NotificationBanner";
 import { AuthProvider } from "@/store/authContext";
-import { setupNotificationChannels, requestNotificationPermission } from "@/services/NotificationService";
+import { useNotificationSetup } from "@/hooks/useNotificationSetup";
 
 export default function RootLayout() {
+  const { permissionGranted } = useNotificationSetup();
   const [showNotificationBanner, setShowNotificationBanner] = useState(false);
 
+  // * banner becomes visible once the permission check resolves to false
   useEffect(() => {
-    setupNotificationChannels();
-
-    requestNotificationPermission().then((granted) => {
-      setShowNotificationBanner(!granted);
-    });
-  }, []);
+    if (permissionGranted === false) setShowNotificationBanner(true);
+  }, [permissionGranted]);
 
   return (
     <AuthProvider>

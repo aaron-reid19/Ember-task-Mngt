@@ -17,30 +17,29 @@
  *     - User name + "EMBER'S CURRENT STATE" label + state badge
  *     - Large HP % number
  *     - HPBar
- *     - 2×2 stats grid: Current streak / Total tasks done / Quests completed / Days tracked
+ *     - 2×2 stats grid: Current streak / Total quests done / Quests completed / Days tracked
  *     - HP Trend chart (line chart) with Weekly/Monthly toggle
- *     - Goal Config — "Daily task goal" stepper
- *   Profile components (HPTrendChart, StreakDisplay, EvolutionLog) each handle their
+ *     - Goal Config — "Daily quest goal" stepper
+ *   Profile components (HPTrendChart, StreakDisplay, HistoryCalendar) each handle their
  *   own internal state (e.g. weekly/monthly toggle lives inside HPTrendChart).
  *   ^ Stats grid values are all stubs — every one of these needs Josh or Aaron's data.
  */
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { updateProfile } from "firebase/auth";
 import { HPBar } from "@/components/ui/HPBar";
-import { HPTrendChart } from "@/components/profile/HPTrendChart";
-import { EvolutionLog } from "@/components/profile/EvolutionLog";
+import { HPTrendChart, ChartRange } from "@/components/profile/HPTrendChart";
+import { HistoryCalendar } from "@/components/profile/HistoryCalendar";
 import Colors from "@/constants/Colors";
 import { Typography } from "@/constants/Typography";
 import { Spacing } from "@/constants/Spacing";
@@ -49,9 +48,8 @@ import { useEmber } from "@/hooks/useEmber";
 import { useStreak } from "@/hooks/useStreak";
 import { useHPHistory } from "@/hooks/useHPHistory";
 import { useQuests } from "@/hooks/useQuests";
+import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/store/authContext";
-import { updateUserProfile } from "@/services/FirestoreServices";
-import { AsyncStorageService } from "@/services/AsyncStorageService";
 
 export default function ProfileScreen() {
   const { hp, state } = useEmber();
@@ -59,24 +57,20 @@ export default function ProfileScreen() {
   const { snapshots } = useHPHistory();
   const { quests } = useQuests();
   const { user, logout } = useAuth();
+  const { dailyGoal, setDailyGoalLocal, updateDisplayName, saveDailyGoal } = useProfile();
   const router = useRouter();
 
   // ~ ─── Local edit state ────────────────────────────────────────────────────
   const [editMode, setEditMode] = useState(false);
   const [editDisplayName, setEditDisplayName] = useState(user?.displayName ?? "Explorer");
-  const [dailyGoal, setDailyGoal] = useState(5);
-
-  useEffect(() => {
-    AsyncStorageService.getDailyGoal().then(setDailyGoal);
-  }, []);
+  const [showTrend, setShowTrend] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [trendRange, setTrendRange] = useState<ChartRange>("weekly");
 
   // ~ ─── Save handler ────────────────────────────────────────────────────────
   const handleSave = async () => {
-    if (user) {
-      await updateProfile(user, { displayName: editDisplayName });
-      await updateUserProfile(user.uid, { displayName: editDisplayName });
-    }
-    await AsyncStorageService.setDailyGoal(dailyGoal);
+    await updateDisplayName(editDisplayName);
+    await saveDailyGoal(dailyGoal);
     setEditMode(false);
   };
 
@@ -119,7 +113,7 @@ export default function ProfileScreen() {
         </View>
 
         {/* Edit profile button */}
-        <TouchableOpacity
+        <Pressable
           style={styles.editButton}
           onPress={() => setEditMode(!editMode)}
           accessibilityLabel="Edit profile settings"
@@ -132,7 +126,7 @@ export default function ProfileScreen() {
           <Text style={styles.editButtonLabel}>
             {editMode ? "Cancel" : "Edit Profile"}
           </Text>
-        </TouchableOpacity>
+        </Pressable>
 
         {/* Large HP % */}
         <Text style={[styles.hpHero, { color: stateColor }]}>{hp}%</Text>
@@ -158,27 +152,27 @@ export default function ProfileScreen() {
           {/* Daily quest goal stepper */}
           <Text style={styles.settingLabel}>Daily Quest Goal</Text>
           <View style={styles.stepper}>
-            <TouchableOpacity
+            <Pressable
               style={styles.stepperButton}
-              onPress={() => setDailyGoal((g) => Math.max(1, g - 1))}
+              onPress={() => setDailyGoalLocal(Math.max(1, dailyGoal - 1))}
               accessibilityLabel="Decrease daily goal"
             >
               <Text style={styles.stepperButtonLabel}>−</Text>
-            </TouchableOpacity>
+            </Pressable>
             <Text style={styles.stepperValue}>{dailyGoal}</Text>
-            <TouchableOpacity
+            <Pressable
               style={styles.stepperButton}
-              onPress={() => setDailyGoal((g) => g + 1)}
+              onPress={() => setDailyGoalLocal(dailyGoal + 1)}
               accessibilityLabel="Increase daily goal"
             >
               <Text style={styles.stepperButtonLabel}>+</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
 
           {/* Save button */}
-          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+          <Pressable style={styles.saveButton} onPress={handleSave}>
             <Text style={styles.saveButtonLabel}>Save Changes</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       )}
 
@@ -200,22 +194,74 @@ export default function ProfileScreen() {
 
       {/* ~ ── HP Trend chart ─────────────────────────────────────── */}
       <View style={styles.card}>
-        <HPTrendChart snapshots={snapshots} />
+        <View style={styles.dropdownHeader}>
+          <Text style={styles.dropdownTitle}>HP Trend</Text>
+          {showTrend && (
+            <View style={styles.toggleGroup}>
+              <Pressable
+                onPress={() => setTrendRange("weekly")}
+                style={[styles.toggleButton, trendRange === "weekly" && styles.toggleButtonActive]}
+              >
+                <Text style={[styles.toggleLabel, trendRange === "weekly" && styles.toggleLabelActive]}>
+                  Weekly
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={() => setTrendRange("monthly")}
+                style={[styles.toggleButton, trendRange === "monthly" && styles.toggleButtonActive]}
+              >
+                <Text style={[styles.toggleLabel, trendRange === "monthly" && styles.toggleLabelActive]}>
+                  Monthly
+                </Text>
+              </Pressable>
+            </View>
+          )}
+          <Pressable
+            onPress={() => setShowTrend(!showTrend)}
+            style={styles.dropdownIcon}
+          >
+            <Ionicons
+              name={showTrend ? "chevron-up" : "chevron-down"}
+              size={20}
+              color={showTrend ? Colors.accent : Colors.textSecondary}
+            />
+          </Pressable>
+        </View>
+        {showTrend && (
+          <HPTrendChart
+            snapshots={snapshots}
+            activeRange={trendRange}
+            onRangeChange={setTrendRange}
+          />
+        )}
       </View>
 
-      {/* ~ ── Evolution Log ──────────────────────────────────────── */}
+      {/* ~ ── History Calendar ─────────────────────────────────────── */}
       <View style={styles.card}>
-        <EvolutionLog snapshots={snapshots} />
+        <View style={styles.dropdownHeader}>
+          <Text style={styles.dropdownTitle}>History</Text>
+          <Pressable
+            onPress={() => setShowHistory(!showHistory)}
+            style={styles.dropdownIcon}
+          >
+            <Ionicons
+              name={showHistory ? "chevron-up" : "chevron-down"}
+              size={20}
+              color={showHistory ? Colors.accent : Colors.textSecondary}
+            />
+          </Pressable>
+        </View>
+        {showHistory && <HistoryCalendar history={snapshots} />}
       </View>
 
       {/* ~ ── Logout ────────────────────────────────────────────── */}
-      <TouchableOpacity style={styles.logoutButton} onPress={async () => {
+      <Pressable style={styles.logoutButton} onPress={async () => {
         await logout();
         router.replace("/(auth)/login");
       }}>
-        <Ionicons name="log-out-outline" size={18} color="#E74C3C" />
+        <Ionicons name="log-out-outline" size={18} color={Colors.destructive} />
         <Text style={styles.logoutLabel}>Log Out</Text>
-      </TouchableOpacity>
+      </Pressable>
 
     </ScrollView>
     </SafeAreaView>
@@ -416,11 +462,47 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
   },
-  cardTitle: {
-    fontSize: Typography.lg,
+  // ~ Dropdown section header
+  dropdownHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  dropdownTitle: {
+    fontSize: Typography.xl,
     fontWeight: Typography.bold,
     color: Colors.textPrimary,
-    marginBottom: Spacing.md,
+  },
+  dropdownIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: Colors.bgCardAlt,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  // ~ Toggle (Weekly / Monthly)
+  toggleGroup: {
+    flexDirection: "row",
+    gap: Spacing.xs,
+  },
+  toggleButton: {
+    paddingVertical: Spacing.xs,
+    paddingHorizontal: Spacing.md,
+    borderRadius: Spacing.md,
+    backgroundColor: "transparent",
+  },
+  toggleButtonActive: {
+    backgroundColor: Colors.accent,
+  },
+  toggleLabel: {
+    color: Colors.textSecondary,
+    fontSize: Typography.xs,
+    fontWeight: Typography.medium,
+  },
+  toggleLabelActive: {
+    color: Colors.completeText,
+    fontWeight: Typography.bold,
   },
   logoutButton: {
     flexDirection: "row",
@@ -430,11 +512,11 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#E74C3C",
+    borderColor: Colors.destructive,
   },
   logoutLabel: {
     fontSize: 15,
     fontWeight: "600" as const,
-    color: "#E74C3C",
+    color: Colors.destructive,
   },
 });

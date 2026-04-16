@@ -8,7 +8,7 @@
  * Notes:
  *  - Calculates streak by sorting all HPSnapshots into an array, taking the date,
  *    then checking if there was any activity on that date. A day is considered to
- *    have activity if at least one task has been completed (HP != 0)
+ *    have activity if at least one quest has been completed (HP != 0)
  *  - calculateLongestStreak walks all history to find the peak consecutive run
  *
  * Dependencies:

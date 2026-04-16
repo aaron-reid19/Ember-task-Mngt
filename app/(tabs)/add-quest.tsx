@@ -38,7 +38,7 @@ import { router } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { HPCostCalculator } from "@/components/tasks/HPCostCalculator";
+import { HPCostCalculator } from "@/components/quests/HPCostCalculator";
 import { CalendarPicker } from "@/components/ui/CalendarPicker";
 import { Button } from "@/components/ui/Button";
 import Colors from "@/constants/Colors";
@@ -318,7 +318,7 @@ const styles = StyleSheet.create({
   },
   pageTitle: {
     fontSize: Typography.xl,
-    fontWeight: Typography.extraBold,
+    fontWeight: Typography.bold,
     color: Colors.textPrimary,
     marginBottom: Spacing.sm,
   },

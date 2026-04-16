@@ -23,7 +23,7 @@ import * as Notifications from "expo-notifications";
  * Schedules the Morning Briefing Notification @ 8AM every day
  * 
  * @param hp - The user's current HP (0-100)
- * @param carryOverCount - Number of incomplete tasks carried over from yesterday
+ * @param carryOverCount - Number of incomplete quests carried over from yesterday
  */
 
 export async function scheduleMorningBriefing(
@@ -35,7 +35,7 @@ export async function scheduleMorningBriefing(
       title: "Good Morning! 🔥",
       body:
         carryOverCount > 0
-          ? `Your HP is ${hp}. You have ${carryOverCount} tasks carried over from yesterday.`
+          ? `Your HP is ${hp}. You have ${carryOverCount} quests carried over from yesterday.`
           : `Your HP is ${hp}. It's a new day, let's keep the flame alive!`,
       data: { type: "morning" },
     },
@@ -50,9 +50,9 @@ export async function scheduleMorningBriefing(
 /**
  * Schedules the Daily Spark notification.
  * Fires at a randomized hour between 11:00 and 13:00 — nudges the user
- * to complete their Daily Spark task.
+ * to complete their Daily Spark quest.
  *
- * @param spark - The name of today's Daily Spark task
+ * @param spark - The name of today's Daily Spark quest
  */
 export async function scheduleDailySpark(spark: string): Promise<void> {
   // Pick a random hour between 11 and 13 inclusive so it doesn't feel robotic
@@ -74,9 +74,9 @@ export async function scheduleDailySpark(spark: string): Promise<void> {
 
 /**
  * Schedules the Midnight Reckoning notification.
- * Fires every day at 20:00 — warns the user how many tasks are still incomplete.
+ * Fires every day at 20:00 — warns the user how many quests are still incomplete.
  *
- * @param incompleteCount - Number of tasks not yet completed today
+ * @param incompleteCount - Number of quests not yet completed today
  */
 export async function scheduleMidnightReckoning(
   incompleteCount: number
@@ -86,8 +86,8 @@ export async function scheduleMidnightReckoning(
       title: "Midnight Reckoning 🌙",
       body:
         incompleteCount > 0
-          ? `${incompleteCount} tasks still incomplete. Ember's flame is fading...`
-          : "All tasks complete! Ember will burn bright tonight. 🔥",
+          ? `${incompleteCount} quests still incomplete. Ember's flame is fading...`
+          : "All quests complete! Ember will burn bright tonight. 🔥",
       data: { type: "midnight" },
     },
     trigger: {

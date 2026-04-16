@@ -40,9 +40,9 @@ function routeFromNotification(data: NotificationData): void {
     case "spark":
       router.push("/(tabs)");
       break;
-      // Midnight Reckoning → Tasks tab (user needs to see incomplete tasks)
+      // Midnight Reckoning → Quest Board tab (user needs to see incomplete quests)
     case "midnight":
-      router.push("/(tabs)/tasks");
+      router.push("/(tabs)/quests");
       break;
       // Unknown notification type — fall back to home
     default:

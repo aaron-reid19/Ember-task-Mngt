@@ -1,3 +1,22 @@
+/**
+ * Ember — Signup Screen
+ * Layer: UI
+ * Owner: Kaley
+ * Task IDs: U10
+ * Status: 🟢 READY
+ *
+ * Dependencies:
+ *   - store/authContext.useAuth(): signup / loginWithGoogle — Aaron — READY
+ *   - react-hook-form + zod — READY
+ *
+ * Notes:
+ *   New account creation with Zod validation (name, email, password).
+ *   On success, firebaseAuth.signup() also calls ensureUserProfile() to create
+ *   the user's Firestore doc before the root layout redirects to onboarding.
+ *   // * password min length is enforced in the schema, not in the TextInput
+ *   // & see login.tsx for the mirror form; keep validation rules in sync
+ */
+
 import React, { useState } from "react";
 import {
   ScrollView,

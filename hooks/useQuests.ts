@@ -2,15 +2,16 @@
  * Ember — useQuests.ts
  * Layer: Logic
  * Owner: Josh
- * Task IDs: L7
+ * Task IDs: L3, L4, L7
  * Status: 🟢 READY
  *
  * Notes:
  *  - Returns quests from Firestore, optionally filtered by cadence
+ *  - Absorbed the former useTasks hook — Task was retired in favour of Quest
  *
  * Dependencies:
  *  - AuthContext for current user ID
- *  - FirestoreServices.getQuests for quest data
+ *  - FirestoreServices.getQuests / updateQuest / createQuest
  */
 
 import { useState, useEffect, useCallback } from "react";
@@ -47,8 +48,9 @@ export function useQuests(cadence?: QuestCadence): {
       let mapped: Quest[] = raw.map((doc: any) => ({
         id: doc.id,
         name: doc.title ?? doc.name ?? "",
+        title: doc.title,
         description: doc.description,
-        hpCost: doc.hpReward ?? doc.hpCost ?? 0,
+        hpCost: doc.hpCost ?? doc.hpReward ?? 0,
         cadence: (doc.cadence ?? "daily") as QuestCadence,
         activeDays: doc.recurrenceRule
           ? doc.recurrenceRule.split(",")
@@ -57,6 +59,9 @@ export function useQuests(cadence?: QuestCadence): {
         completed: doc.completed ?? false,
         isDailySpark: doc.isDailySpark ?? false,
         status: doc.completed ? "complete" : "in progress",
+        priority: doc.priority ?? "medium",
+        tags: doc.tags ?? [],
+        createdAt: doc.createdAt?.toDate?.()?.toISOString?.() ?? doc.createdAt ?? "",
       }));
 
       if (cadence && cadence !== "all") {
