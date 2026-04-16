@@ -1,3 +1,20 @@
+/**
+ * Ember — Notification Service
+ * Layer: Data
+ * Owner: Aaron
+ * Task IDs: D12
+ * Status: 🟢 READY
+ *
+ * Dependencies:
+ *   - expo-notifications — installed — READY
+ *
+ * Notes:
+ *   Sets up Android notification channels and requests OS-level permission.
+ *   Actual scheduling lives in utils/notificationEngine.ts (Josh's L8).
+ *   // ^ Android requires a channel before any notification can be posted
+ *   // & see utils/notificationEngine.ts for scheduling logic
+ */
+
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 

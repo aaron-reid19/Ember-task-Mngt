@@ -1,3 +1,22 @@
+/**
+ * Ember — Login Screen
+ * Layer: UI
+ * Owner: Kaley
+ * Task IDs: U10
+ * Status: 🟢 READY
+ *
+ * Dependencies:
+ *   - store/authContext.useAuth(): login / loginWithGoogle — Aaron — READY
+ *   - react-hook-form + zod — READY
+ *
+ * Notes:
+ *   Email/password sign-in with Zod validation. Errors from Firebase surface
+ *   inline via friendlyError() on the service side — this screen only displays.
+ *   On success, root layout redirect hands off to (tabs).
+ *   // * Controller + zodResolver keeps the screen free of useState per field
+ *   // & see signup.tsx for the mirror form; keep schemas and styles in sync
+ */
+
 import React, { useState } from "react";
 import {
   ScrollView,

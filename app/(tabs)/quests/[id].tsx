@@ -108,6 +108,12 @@ export default function QuestDetailScreen() {
         style={styles.actionBtn}
       />
       <Button
+        label="Edit Quest"
+        onPress={() => router.push(`/(tabs)/quests/edit/${id}`)}
+        variant="secondary"
+        style={styles.actionBtn}
+      />
+      <Button
         label="Back to Dashboard"
         onPress={() => router.replace("/(tabs)")}
         variant="secondary"

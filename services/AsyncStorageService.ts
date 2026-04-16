@@ -1,3 +1,21 @@
+/**
+ * Ember — AsyncStorage Service
+ * Layer: Data
+ * Owner: Aaron
+ * Task IDs: D3
+ * Status: 🟢 READY
+ *
+ * Dependencies:
+ *   - @react-native-async-storage/async-storage — installed — READY
+ *   - types/ember.ts: EmberState, LocalEmberData — Kaley — READY
+ *
+ * Notes:
+ *   Offline-first local cache for HP value, visual state, and daily goal.
+ *   Written before Firestore by HPSyncService so the UI always has instant data.
+ *   // ^ defaults to 100 HP / "Thriving" on first launch — do not persist until user opts in
+ *   // & see ADR-004 — AsyncStorage is the single source of truth while offline
+ */
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { EmberState, LocalEmberData } from "@/types/ember";
 
@@ -5,6 +23,7 @@ const STORAGE_KEYS = {
     hp: "ember_hp",
     visualState: "ember_visual_state",
     dailyGoal: "ember_daily_goal",
+    tasksMigrated: "ember_tasks_migrated_v1",
 } as const;
 
 const DEFAULT_HP = 100;
@@ -134,6 +153,25 @@ export const AsyncStorageService = {
         } catch (error) {
             console.error("Failed to write daily goal to AsyncStorage:", error);
             throw error;
+        }
+    },
+
+    // Tracks whether the one-time tasks→quests migration has run for this user.
+    // Keyed per-userId so a shared device still migrates both accounts.
+    async hasMigratedTasks(userId: string): Promise<boolean> {
+        try {
+            const stored = await AsyncStorage.getItem(`${STORAGE_KEYS.tasksMigrated}:${userId}`);
+            return stored === "true";
+        } catch {
+            return false;
+        }
+    },
+
+    async markTasksMigrated(userId: string): Promise<void> {
+        try {
+            await AsyncStorage.setItem(`${STORAGE_KEYS.tasksMigrated}:${userId}`, "true");
+        } catch (error) {
+            console.error("Failed to mark tasks as migrated:", error);
         }
     },
 

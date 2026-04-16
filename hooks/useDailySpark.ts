@@ -6,34 +6,34 @@
  * Status: 🟢 READY
  *
  * Notes:
- *  - Returns a single task that has been randomly selected as the Daily Spark
- *  - Uses real task data from Firestore via useTasks
+ *  - Returns a single quest that has been randomly selected as the Daily Spark
+ *  - Uses real quest data from Firestore via useQuests
  *
  * Dependencies:
- *  - useTasks hook for real task list
+ *  - useQuests hook for real quest list
  *  - sparkEngine.selectDailySpark for selection logic
  */
 
-import { Task } from "@/types";
-import { useTasks } from "./useTasks";
+import { Quest } from "@/types";
+import { useQuests } from "./useQuests";
 import { selectDailySpark } from "@/utils/sparkEngine";
 
-export function useDailySpark(externalTasks?: Task[]): { spark: Task | null; loading: boolean } {
-  const { tasks: internalTasks, loading: internalLoading } = useTasks();
-  const tasks = externalTasks ?? internalTasks;
-  const loading = externalTasks ? false : internalLoading;
+export function useDailySpark(externalQuests?: Quest[]): { spark: Quest | null; loading: boolean } {
+  const { quests: internalQuests, loading: internalLoading } = useQuests();
+  const quests = externalQuests ?? internalQuests;
+  const loading = externalQuests ? false : internalLoading;
 
   if (loading) {
     return { spark: null, loading: true };
   }
 
-  // Check if any task is already marked as daily spark
-  const existingSpark = tasks.find((t) => t.isDailySpark);
+  // Check if any quest is already marked as daily spark
+  const existingSpark = quests.find((q) => q.isDailySpark);
   if (existingSpark) {
     return { spark: existingSpark, loading: false };
   }
 
-  // Otherwise, randomly select one from incomplete tasks
-  const spark = selectDailySpark(tasks);
+  // Otherwise, randomly select one from incomplete quests
+  const spark = selectDailySpark(quests);
   return { spark, loading: false };
 }

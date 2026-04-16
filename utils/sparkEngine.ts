@@ -4,20 +4,20 @@
  * Owner: Josh
  * Task IDs: L4
  * Status: 🟢 COMPLETE
- * 
- * Notes: 
- *  - Randomly selects a task to be designated as the Daily Spark
- * 
- * Dependencies: 
- *  - Task type from @/types/task
+ *
+ * Notes:
+ *  - Randomly selects a quest to be designated as the Daily Spark
+ *
+ * Dependencies:
+ *  - Quest type from @/types
  */
 
-import { Task } from "@/types/task";
+import { Quest } from "@/types";
 
-/** Randomly selects a task to be designated as the Daily Spark */
-export function selectDailySpark(tasks: Task[]): Task | null {
-  const incomplete = tasks.filter(task => task.completed === false);
-  
+/** Randomly selects a quest to be designated as the Daily Spark */
+export function selectDailySpark(quests: Quest[]): Quest | null {
+  const incomplete = quests.filter(quest => quest.completed === false);
+
   // ^ EDGE CASE: Checks if array is equal to or less than zero to avoid failure
   if (incomplete.length <= 0) {
     return null;

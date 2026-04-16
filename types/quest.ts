@@ -10,9 +10,20 @@
  *   UI display labels are provided by CADENCE_LABELS.
  *   Aaron's Firestore schema (D8) must match this shape.
  *   Josh's useQuests(cadence) hook filters by QuestCadence.
+ *
+ * 🔵 DECISION — absorbed former Task type into Quest [Apr 2026]
+ *   The former `Task` concept was retired in favour of `Quest`. Task-only
+ *   fields (priority, tags, createdAt, updatedAt, title) are kept as optional
+ *   on Quest so Home + edit flows that used Tasks still type-check.
+ *   // * `title` is kept as a compatibility alias for Aaron's Firestore field
+ *   // & see COMMENTING_CONVENTIONS.md — this DECISION documents the merge
  */
 
 export type QuestCadence = "all" | "today" | "daily" | "weekly" | "biweekly" | "monthly" | "custom";
+
+export type QuestPriority = "low" | "medium" | "high";
+
+export type QuestTag = string; // free-form string tags — e.g. "health", "work"
 
 // * Display labels for UI — maps Firestore values to human-readable text
 export const CADENCE_LABELS: Record<QuestCadence, string> = {
@@ -31,12 +42,20 @@ export type WeekDay = "M" | "T" | "W" | "Th" | "F" | "S" | "Su";
 export interface Quest {
   id: string;
   name: string;
-  description?: string;    // optional — shown in Figma Add Quest form
-  hpCost: number;          // displayed as "+20 pts" on QuestCard
+  title?: string;            // Aaron's Firestore field name — kept for compatibility
+  description?: string;      // optional — shown in Figma Add Quest form
+  hpCost: number;            // displayed as "+20 pts" on QuestCard
   cadence: QuestCadence;
-  activeDays?: WeekDay[];  // only relevant when cadence is "Weekly"
-  startDate?: string;      // ISO date string — set in Add Quest form
+  activeDays?: WeekDay[];    // only relevant when cadence is "weekly"
+  startDate?: string;        // ISO date string — set in Add Quest form
   completed: boolean;
-  isDailySpark: boolean;   // true if this quest was selected as today's Spark
+  isDailySpark: boolean;     // true if this quest was selected as today's Spark
   status: "in progress" | "complete";
+  // Former Task-only fields — now optional on Quest
+  priority?: QuestPriority;
+  tags?: QuestTag[];
+  createdAt?: string;        // ISO timestamp
+  updatedAt?: string;        // ISO timestamp
 }
+
+export type NewQuest = Omit<Quest, "id" | "createdAt" | "updatedAt">;

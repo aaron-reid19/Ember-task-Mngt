@@ -1,26 +1,26 @@
 /**
- * Ember — Task Edit Screen
+ * Ember — Quest Edit Screen
  * Layer: UI
  * Owner: Kaley
  * Task IDs: U7
  * Status: 🟢 READY
  *
  * Dependencies:
- *   - L3: useTask(id) hook returning a single Task — Josh — 🟢 READY
- *   - D7: useTasks().update() for persisting edits — Aaron — 🟢 READY
+ *   - L3: useQuest(id) hook returning a single Quest — Josh — 🟢 READY
+ *   - D7: useQuests().update() for persisting edits — Aaron — 🟢 READY
  *
  * Notes:
- *   Pushed onto the stack when the user taps a TaskListItem on the task list.
- *   The user can edit the task name, priority, and HP cost.
- *   All form values are managed by React Hook Form + Zod.
- *   On save, the screen calls useTasks().update() which routes through Josh's hook.
+ *   Pushed onto the stack when the user taps a QuestListItem. The user can
+ *   edit the quest name, priority, and HP cost. All form values are managed
+ *   by React Hook Form + Zod. On save, calls useQuests().update().
+ *   // * Priority is kept as a quest-level concept (former Task field)
  *
  * SCREEN LAYOUT:
  *   ┌──────────────────────────────────┐
  *   │ ← Back                          │
- *   │  Edit Task                       │
+ *   │  Edit Quest                     │
  *   │ ┌────────────────────────────┐   │
- *   │ │ Task Name                  │   │
+ *   │ │ Quest Name                 │   │
  *   │ │ [__________________]      │   │  ← TextInput
  *   │ │ Priority                   │   │
  *   │ │ [low] [medium] [high]     │   │  ← Badge selector
@@ -37,54 +37,52 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import type { TaskPriority } from "@/types";
+import type { QuestPriority } from "@/types";
 import { Ionicons } from "@expo/vector-icons";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { HPCostCalculator } from "@/components/tasks/HPCostCalculator";
+import { HPCostCalculator } from "@/components/quests/HPCostCalculator";
 import Colors from "@/constants/Colors";
 import { Spacing } from "@/constants/Spacing";
 import { Typography } from "@/constants/Typography";
-import { useTask } from "@/hooks/useTask";
-import { useTasks } from "@/hooks/useTasks";
-import { useAuth } from "@/store/authContext";
+import { useQuest } from "@/hooks/useQuest";
+import { useQuests } from "@/hooks/useQuests";
 
-// Zod schema — validation rules for the task edit form
-const taskSchema = z.object({
-  name: z.string().trim().min(1, "Task name is required."),
+// Zod schema — validation rules for the quest edit form
+const questSchema = z.object({
+  name: z.string().trim().min(1, "Quest name is required."),
   priority: z.enum(["low", "medium", "high"]),
   hpCost: z.number().min(1).max(50),
 });
-type TaskFormData = z.infer<typeof taskSchema>;
+type QuestFormData = z.infer<typeof questSchema>;
 
 // * Priority badge colors now come from Colors.ts design tokens
-const PRIORITY_BADGE_COLORS: Record<TaskPriority, string> = {
+const PRIORITY_BADGE_COLORS: Record<QuestPriority, string> = {
   high: Colors.priorityHigh,
   medium: Colors.priorityMedium,
   low: Colors.priorityLow,
 };
 
-export default function TaskEditScreen() {
+export default function QuestEditScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { task, loading } = useTask(id);
-  const { update: updateTask } = useTasks();
-  const { user } = useAuth();
+  const { quest } = useQuest(id);
+  const { update: updateQuest } = useQuests();
   const router = useRouter();
 
-  const { control, handleSubmit, formState: { errors }, setValue, watch } = useForm<TaskFormData>({
-    resolver: zodResolver(taskSchema),
+  const { control, handleSubmit, formState: { errors }, setValue, watch } = useForm<QuestFormData>({
+    resolver: zodResolver(questSchema),
     defaultValues: {
-      name: task?.name ?? "",
-      priority: task?.priority ?? "medium",
-      hpCost: task?.hpCost ?? 10,
+      name: quest?.name ?? "",
+      priority: quest?.priority ?? "medium",
+      hpCost: quest?.hpCost ?? 10,
     },
   });
 
   const selectedPriority = watch("priority");
 
-  const onSubmit = async (data: TaskFormData) => {
-    await updateTask(id, {
+  const onSubmit = async (data: QuestFormData) => {
+    await updateQuest(id, {
       title: data.name,
       priority: data.priority,
       hpCost: data.hpCost,
@@ -104,7 +102,7 @@ export default function TaskEditScreen() {
         </View>
 
         <Card>
-          {/* Task name input */}
+          {/* Quest name input */}
           <Text style={styles.fieldLabel}>Quest Name</Text>
           <Controller
             control={control}
@@ -123,7 +121,7 @@ export default function TaskEditScreen() {
           {/* Priority selector — tap a badge to select that priority */}
           <Text style={styles.fieldLabel}>Priority</Text>
           <View style={styles.priorityOptions}>
-            {(["low", "medium", "high"] as TaskPriority[]).map((level) => (
+            {(["low", "medium", "high"] as QuestPriority[]).map((level) => (
               <Badge
                 key={level}
                 label={level.charAt(0).toUpperCase() + level.slice(1)}
@@ -137,7 +135,7 @@ export default function TaskEditScreen() {
             ))}
           </View>
 
-          {/* HP cost stepper — +/- buttons to set how much HP this task costs */}
+          {/* HP cost stepper — +/- buttons to set how much HP this quest costs */}
           <Text style={styles.fieldLabel}>HP Cost</Text>
           <Controller
             control={control}

@@ -13,8 +13,8 @@
  *   Profile     → (tabs)/profile.tsx
  *
  * HIDDEN ROUTES (accessible via navigation, not in tab bar):
- *   Tasks       → (tabs)/tasks/index.tsx → Nested stack: tasks/[id].tsx
- *   Quest Detail→ (tabs)/quests/[id].tsx
+ *   Quest Detail → (tabs)/quests/[id].tsx
+ *   Quest Edit   → (tabs)/quests/edit/[id].tsx
  */
 
 import { Tabs } from "expo-router";
@@ -45,7 +45,7 @@ export default function TabLayout() {
         },
       }}
     >
-      {/* Tab 1: Home — creature + HP bar + Daily Spark + task preview */}
+      {/* Tab 1: Home — creature + HP bar + Daily Spark + quest preview */}
       <Tabs.Screen
         name="index"
         options={{
@@ -89,11 +89,6 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Hidden: Tasks — accessible via "See All Today's Tasks" link on Home */}
-      <Tabs.Screen
-        name="tasks"
-        options={{ href: null }}
-      />
     </Tabs>
   );
 }

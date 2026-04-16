@@ -71,6 +71,9 @@ const Colors = {
   priorityMedium: "#F5A623",  // * added — confirm matches Figma
   priorityLow: "#7B6A95",     // * added — confirm matches Figma
 
+  // * Destructive / log-out action color — shared with priorityHigh
+  destructive: "#E74C3C",
+
   // * Status indicators
   onlineGreen: "#22C55E",     // * added — confirm matches Figma
 

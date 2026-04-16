@@ -11,7 +11,7 @@
  *
  * Notes:
  *   Provides onboarding status and loading state.
- *   HP is calculated in useEmber() from task hpCost values — not stored here.
+ *   HP is calculated in useEmber() from quest hpCost values — not stored here.
  */
 
 import { useState, useEffect } from "react";

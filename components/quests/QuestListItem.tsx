@@ -1,20 +1,21 @@
 /**
- * Ember — TaskListItem
+ * Ember — QuestListItem
  * Layer: UI
  * Owner: Kaley
  * Task IDs: U6
- * Status: 🟡 STUB
+ * Status: 🟢 READY
  *
  * Dependencies:
- *   - L3: onToggle triggers HP restoration — Josh — PENDING
- *   - D7: task toggle write — Aaron — PENDING
+ *   - L3: onToggle triggers HP restoration — Josh — READY
+ *   - D7: quest toggle write — Aaron — READY
  *
  * Notes:
- *   Figma Home screen shows task rows with:
+ *   Figma Home screen shows quest rows with:
  *     - Checkbox (same pattern as QuestCard)
- *     - Task name (struck-through when completed, muted colour)
+ *     - Quest name (struck-through when completed, muted colour)
  *     - "+10 HP" / "+20 HP" label on the right (amber when completed)
  *   Used in the "Today's Progress" section on the Home screen.
+ *   // * this is the compact row variant — QuestCard is the full card used on Quest Board
  */
 
 import React from "react";
@@ -22,38 +23,38 @@ import { StyleSheet, Text, View, Pressable } from "react-native";
 import Colors from "@/constants/Colors";
 import { Typography } from "@/constants/Typography";
 import { Spacing } from "@/constants/Spacing";
-import { Task } from "@/types";
+import { Quest } from "@/types";
 
 // ~ ─────────────────────────────────────────────────────────────────
 
-interface TaskListItemProps {
-  task: Task;
+interface QuestListItemProps {
+  quest: Quest;
   onToggle: () => void;
 }
 
 // ~ ─────────────────────────────────────────────────────────────────
 
-export function TaskListItem({ task, onToggle }: TaskListItemProps) {
+export function QuestListItem({ quest, onToggle }: QuestListItemProps) {
   return (
     <View style={styles.row}>
       {/* Checkbox */}
       <Pressable onPress={onToggle} hitSlop={8}>
-        <View style={[styles.checkbox, task.completed && styles.checkboxDone]}>
-          {task.completed && <Text style={styles.checkmark}>✓</Text>}
+        <View style={[styles.checkbox, quest.completed && styles.checkboxDone]}>
+          {quest.completed && <Text style={styles.checkmark}>✓</Text>}
         </View>
       </Pressable>
 
-      {/* Task name */}
+      {/* Quest name */}
       <Text
-        style={[styles.name, task.completed && styles.nameStruck]}
+        style={[styles.name, quest.completed && styles.nameStruck]}
         numberOfLines={1}
       >
-        {task.name}
+        {quest.name}
       </Text>
 
       {/* HP value */}
-      <Text style={[styles.hp, task.completed && styles.hpCompleted]}>
-        +{task.hpCost} HP
+      <Text style={[styles.hp, quest.completed && styles.hpCompleted]}>
+        +{quest.hpCost} HP
       </Text>
     </View>
   );
